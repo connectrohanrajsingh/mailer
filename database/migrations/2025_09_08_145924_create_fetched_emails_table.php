@@ -25,6 +25,7 @@ return new class extends Migration {
             $table->string('thread_id')->nullable();                  // conversation/thread ID
             $table->string('in_reply_to')->nullable();
             $table->unsignedTinyInteger('have_attachments')->default(0);
+            $table->unsignedTinyInteger('processed')->default(0);
             $table->timestamps();
 
             $table->unique(['folder', 'uid'], 'unq_folder_uid');

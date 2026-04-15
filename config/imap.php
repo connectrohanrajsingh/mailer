@@ -74,6 +74,8 @@ return [
             'username'      => env('IMAP_USERNAME'),
             'password'      => env('IMAP_PASSWORD'),
             'folder'        => env('IMAP_FOLDER', 'INBOX'),
+            'start_date'    => env('IMAP_START_DATE', ''),
+            'mails_per_page'    => env('IMAP_MAILS_PER_PAGE', 50),
             // 'authentication' => 'oauth',
         ],
 

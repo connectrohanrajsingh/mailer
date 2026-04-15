@@ -25,6 +25,7 @@ class FetchedEmailOverview extends Model
         'thread_id',
         'in_reply_to',
         'have_attachments',
+        'processed'
     ];
 
     protected $casts = [
@@ -32,6 +33,7 @@ class FetchedEmailOverview extends Model
         'answered'         => 'boolean',
         'flagged'          => 'boolean',
         'have_attachments' => 'boolean',
+        'processed'        => 'boolean',
         'date'             => 'datetime',
         'received_date'    => 'datetime',
     ];

@@ -33,30 +33,40 @@ class TestEmailFetch extends Command
             return 1;
         }
 
-        $folder = $client->getFolder( $folderName);
+        $folder = $client->getFolder($folderName);
 
-        // $message = $folder->query()->since('2026-04-09')->before('2026-04-10');
+
+        $this->info("Fetching: " . now());
+        // $message = $folder->query()->setFetchOrder("asc")->whereUid(375430)->get();
         // $this->info("Fetched emails count" . $message->count());
 
-        // $message = $folder->query()->setFetchOrder("asc")->whereUid(375430)->get();
+        $messages = $folder->query()
+            ->setFetchOrder("asc")
+            ->whereOn('2026-04-14')
+            ->setFetchOptions(FT_PEEK)
+            ->limit(1)
+            ->get();
 
-
-        $range = '375431:375631';
-
-        // $message = $folder->query()->setUid($range)->get();
-        $message = $folder->overview("375430:375431");
-
-
-        foreach ($message as $uid => $headers) {
-
-            $this->info("UID: $uid");
-
-            $this->info("Subject: " . $headers['subject']);
-            $this->info("From: " . $headers['from']);
-            $this->info("Message ID: " . $headers['message_id']);
-            $this->info("Date: " . $headers['date']);
+        foreach ($messages as $message) {
+            $this->info("UID: {$message->getUid()}");
+            $this->info("Subject: {$message->getSubject()}");
+            $this->info("From: {$message->getFrom()[0]->mail}");
+            $this->info("Message ID: {$message->getMessageId()}");
+            $this->info("Dump: " . json_encode($message));
         }
 
-        $this->info("Done ✅");
+        // $message = $folder->overview("375430:375480");
+        // foreach ($message as $uid => $headers) {
+        //     $this->info("UID: $uid");
+        //     $this->info("Subject: " . $headers['subject']);
+        //     $this->info("From: " . $headers['from']);
+        //     $this->info("Message ID: " . $headers['message_id']);
+        //     $this->info("Date: " . $headers['date']);
+        // }
+
+
+
+
+        $this->info("Done: " . now());
     }
 }
