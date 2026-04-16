@@ -11,8 +11,8 @@ return new class extends Migration {
             $table->string('folder', 100);                           // IMAP folder to scan
             $table->bigInteger('uid');                               // IMAP UID (for incremental sync)
             $table->string('message_id');                            // RFC message-id
-            $table->string('message_id_hashed', 64);       // Deduplication 
-            $table->string('subject')->nullable();
+            $table->string('message_id_hashed', 64);                 // Deduplication 
+            $table->string('subject',1000)->nullable();
             $table->string('sender_name')->nullable();
             $table->string('sender_email')->nullable();
             $table->string('priority')->nullable();

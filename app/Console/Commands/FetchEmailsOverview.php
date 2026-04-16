@@ -2,36 +2,34 @@
 
 namespace App\Console\Commands;
 
+use App\Models\FetchedEmailOverview;
 use App\Models\FetchedEmailTracker;
-use App\Services\SaveEmailWebklex;
 use Illuminate\Console\Command;
 use Webklex\IMAP\Facades\Client;
-use App\Models\FetchedEmail;
+use Carbon\Carbon;
 use Exception;
 use Webklex\PHPIMAP\Exceptions\ConnectionFailedException;
 
 class FetchEmailsOverview extends Command
 {
-    protected $signature = 'emails:fetch';
-    protected $description = 'Fetch latest emails from IMAP every few minutes';
+    protected $signature = 'emails:fetchoverview';
+    protected $description = 'Fetch latest emails overview from IMAP every few minutes';
 
-    protected $firstFetch;
     protected $imapFolder;
+    protected $mailsPerPageThrottled = 150;
     protected $mailsPerPage;
-    protected $currentDateObject;
     protected $fallbackDateObject;
+    protected $folder;
+    protected FetchedEmailTracker $tracker;
 
     public function __construct()
     {
         parent::__construct();
-
-        $this->firstFetch = FALSE;
-
-        $this->imapFolder   = config('imap.accounts.gmail.folder');
-        $this->mailsPerPage = config('imap.accounts.gmail.mails_per_page');
-
-        $this->currentDateObject  = now();
+        $this->imapFolder         = config('imap.accounts.gmail.folder');
         $this->fallbackDateObject = config('imap.accounts.gmail.start_date');
+
+        $mailsPerPage       = config('imap.accounts.gmail.mails_per_page');
+        $this->mailsPerPage = $mailsPerPage < $this->mailsPerPageThrottled ? $mailsPerPage : $this->mailsPerPageThrottled;
     }
 
     private function clientConnection()
@@ -44,135 +42,149 @@ class FetchEmailsOverview extends Command
                 throw new Exception("IMAP is not connected.");
             }
 
-            $folder = $client->getFolder($this->imapFolder);
-            if (!$folder) {
+            $this->folder = $client->getFolder($this->imapFolder);
+            if (!$this->folder) {
                 throw new Exception("IMAP folder {$this->imapFolder} does not exist or is inaccessible.");
             }
         }
         catch (ConnectionFailedException $e) {
             $this->error("IMAP connection failed: " . $e->getMessage());
-            return null;
+            return;
 
         }
         catch (Exception $e) {
             $this->error("Error: " . $e->getMessage());
-            return null;
+            return;
         }
-        return $folder;
+
+        return;
+    }
+
+    private function makeMessageIdHashed($messageId)
+    {
+        $normalized = strtolower(trim($messageId));
+        $hash       = hash('sha256', $normalized);
+        return $hash;
     }
 
     private function getTracker()
     {
-        // if script ran for the very first time
+        $currentDateObject = now();
+        $startUid          = 1;
+
         $trackerId = FetchedEmailTracker::max('id');
+
+        // if script ran for the very first time
         if (!$trackerId) {
-            $this->currentDateObject = $this->fallbackDateObject;
-            $this->firstFetch        = TRUE;
+            $currentDateObject = Carbon::parse($this->fallbackDateObject);
+
+            $messages = $this->folder->query()->setFetchOrder("asc")->whereOn($currentDateObject)->limit(1)->get();
+            foreach ($messages as $message) {
+                $startUid = $message->getUid();
+            }
+        }
+        else {
+            $startUid = FetchedEmailTracker::max('last_uid') + 1;
+            if ($startUid == 1) {
+                $startUid = FetchedEmailTracker::max('start_uid');
+            }
         }
 
-        $fetchDate = $this->currentDateObject->copy()->format('Y-m-d');
-        $tracker   = FetchedEmailTracker::firstOrCreate(['folder' => $this->imapFolder, 'fetch_date' => $fetchDate]);
-        return $tracker;
+        $fetchDate     = $currentDateObject->copy()->format('Y-m-d');
+        $this->tracker = FetchedEmailTracker::firstOrCreate(['folder' => $this->imapFolder, 'fetch_date' => $fetchDate], ['start_uid' => $startUid]);
+        return;
     }
-
-
-    private function inititaliseTracker($tracker)
-    {
-        if ($this->firstFetch) {
-        }
-
-        $tracker->refresh();
-        return $tracker;
-    }
-
-
-
-
 
     public function handle()
     {
-        $tracker = $this->getTracker();
-        if (empty($tracker)) {
-            $this->info("Tracker not found");
-            return;
+        $this->info("Connecting to imap.");
+        $this->clientConnection();
+        if (!$this->folder) {
+            $this->error("No folder connection available. Exiting.");
+            return 1;
         }
 
-        $clientFolder = $this->clientConnection();
-        if (empty($clientFolder)) {
-            $this->info("Client folder is not connected");
-            return;
+        $this->info("Fetching Tracker.");
+        $this->getTracker();
+        if (!$this->tracker) {
+            $this->error("No tracker available. Exiting.");
+            return 1;
         }
 
-        $startDate = $this->currentDateObject->copy()->format('Y-m-d');
-        $endDate   = $this->currentDateObject->copy()->addDays(1)->format('Y-m-d');
+        $startRange = ($this->tracker->last_uid > 0) ? $this->tracker->last_uid + 1 : $this->tracker->start_uid;
+        $endRange   = $startRange + $this->mailsPerPage - 1;
 
-        $query = $clientFolder->query()->setFetchOrder('asc')->since($startDate)->before($endDate);
+        $this->info("Fetching mails within uid $startRange:$endRange.");
 
-        $totalMails = $query->count();
-        $totalPages = ceil($totalMails / $this->mailsPerPage);
+        $emails      = $this->folder->overview("$startRange:$endRange");
+        $totalEmails = count($emails);
 
-        if ($totalMails != $tracker->total_emails) {
-            $tracker->update(['total_emails' => $totalMails, 'total_page' => $totalPages]);
+        if ($totalEmails == 0) {
+            $this->info("No new mails found to sync.");
+            return 0;
         }
 
-        if ($tracker->total_emails == $tracker->processed_emails) {
-            $this->info("No new mails found");
-            return;
-        }
-
-        $page = $tracker->processed_pages + 1;
-
-        $this->info("IMAP Connected, Fetching mails");
-        $this->info("Total Emails Found : $totalMails");
-        $this->info("Fetching emails for: $startDate");
-        $this->info("Emails per page: {$this->mailsPerPage}");
-        $this->info("Fetch emails started at " . now()->format('Y-m-d H:i:s'));
-        $this->info("Current page: $page");
-
-        // to get the same page emails and try to find new one 
-        $page = ($page > $totalPages) ? $totalPages : $page;
-
-        $emails = $query->limit($this->mailsPerPage, $page)->get();
-
-        if ($emails->isEmpty()) {
-            $this->warn("No emails found, returning.");
-            return;
-        }
-
-        $bar = $this->output->createProgressBar($emails->count());
+        $this->info("$totalEmails mails fetched.");
+        $bar = $this->output->createProgressBar($totalEmails);
         $bar->start();
 
-        $savedMails = 0;
-        $processed  = 0;
-        foreach ($emails as $email) {
-            // Skip duplicates
-            if (FetchedEmail::where('message_id', $email->getMessageId())->exists()) {
-                $this->info("Mail with id {$email->getMessageId()} already exists, skipping");
-                $bar->advance();
-                $processed++;
+        $saveOverview = [];
+        $currentTime  = now()->format('Y-m-d H:i:s');
+        $lastUid      = $startRange;
+
+        $this->info("Started query building.");
+        foreach ($emails as $uid => $header) {
+
+            $messageId = (string) $header['message_id'];
+            if (empty($messageId)) {
                 continue;
             }
-
-            $response = app(SaveEmailWebklex::class)->saveEmail($email);
-            if ($response['status'] == 'success') {
-                $savedMails++;
+            try {
+                $parsedDate = Carbon::parse((string) $header['date']);
+                $parsedDate = $parsedDate->isFuture() ? $currentTime : $parsedDate;
             }
-            $processed++;
+            catch (Exception $e) {
+                $parsedDate = now();
+            }
+
+            $saveOverview[] = [
+                'folder'            => $this->imapFolder,
+                'uid'               => $uid,
+                'message_id'        => $messageId,
+                'message_id_hashed' => $this->makeMessageIdHashed($messageId),
+                'date'              => $parsedDate,
+                'created_at'        => $currentTime,
+                'updated_at'        => $currentTime
+            ];
+
+            $lastUid = $uid;
             $bar->advance();
         }
 
-        if ($savedMails > 0) {
-            $tracker->increment('processed_emails', $savedMails);
-        }
+        $this->info("Saving mails.");
 
-        if ($processed == $mailsPerPage) {
-            $tracker->increment('processed_pages', 1);
-        }
+
+
+        $processedEmails = 0;
+        collect($saveOverview)
+            ->chunk(50)
+            ->each(function ($chunk) use (&$processedEmails) {
+                $processedEmails += FetchedEmailOverview::insertOrIgnore($chunk->toArray());
+            });
+
+        $this->info("$processedEmails mails saved.");
+        $this->info("Updating tracker with last uid $lastUid.");
+
+        $totalEmails = $this->tracker->total_emails + $totalEmails;
+        $savedEmails = $this->tracker->processed_emails + $processedEmails;
+        $this->tracker->update([
+            'last_uid'         => $lastUid,
+            'total_emails'     => $totalEmails,
+            'processed_emails' => $savedEmails,
+        ]);
+
         $bar->finish();
+        $this->info("Sync complete.");
+        return 0;
     }
-
-
-
-
-
 }

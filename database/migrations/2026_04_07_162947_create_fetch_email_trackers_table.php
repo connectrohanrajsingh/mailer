@@ -16,8 +16,6 @@ return new class extends Migration {
             $table->string('folder', 100);
             $table->integer('total_emails')->default(0);
             $table->integer('processed_emails')->default(0);
-            $table->integer('total_page')->default(0);
-            $table->integer('processed_pages')->default(0);
             $table->bigInteger('start_uid')->nullable();
             $table->bigInteger('last_uid')->nullable();
             $table->enum('status', ['PENDING', 'PROCESSING', 'COMPLETED'])->default('PENDING');
