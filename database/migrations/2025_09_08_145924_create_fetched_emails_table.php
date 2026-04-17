@@ -12,7 +12,7 @@ return new class extends Migration {
             $table->bigInteger('uid');                               // IMAP UID (for incremental sync)
             $table->string('message_id');                            // RFC message-id
             $table->string('message_id_hashed', 64);                 // Deduplication 
-            $table->string('subject',1000)->nullable();
+            $table->string('subject', 1000)->nullable();
             $table->string('sender_name')->nullable();
             $table->string('sender_email')->nullable();
             $table->string('priority')->nullable();
@@ -21,7 +21,6 @@ return new class extends Migration {
             $table->unsignedTinyInteger('answered')->default(0);
             $table->unsignedTinyInteger('flagged')->default(0);
             $table->timestamp('date')->nullable()->index();           // Sent date
-            $table->timestamp('received_date')->nullable();           // Received date
             $table->string('thread_id')->nullable();                  // conversation/thread ID
             $table->string('in_reply_to')->nullable();
             $table->unsignedTinyInteger('have_attachments')->default(0);
@@ -72,8 +71,8 @@ return new class extends Migration {
             $table->unsignedTinyInteger('inline')->default(0);       // quick flag
             $table->string('content_id')->nullable();
             $table->string('checksum', 64)->nullable()->index();     // hash for deduplication
-            $table->string('storage_disk',50);
-            $table->string('storage_path',1024);
+            $table->string('storage_disk', 50);
+            $table->string('storage_path', 1024);
             $table->timestamps();
             $table->index('email', 'idx_email');
         });

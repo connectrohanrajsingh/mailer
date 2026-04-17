@@ -16,8 +16,8 @@ class TestEmailFetch extends Command
     {
         $this->info("Connecting to IMAP...");
 
-        $client     = Client::account('gmail');
-        $folderName = config('imap.accounts.gmail.folder');
+        $client     = Client::account('imap');
+        $folderName = config('imap.accounts.imap.folder');
 
 
         try {
@@ -55,7 +55,7 @@ class TestEmailFetch extends Command
         //     $this->info("Dump: " . json_encode($message));
 
 
-        $message = $folder->overview("364930:364931");
+        $message = $folder->overview("365232:365231");
         // return 0;
         foreach ($message as $uid => $headers) {
             $this->info("UID: $uid");
