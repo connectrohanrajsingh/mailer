@@ -14,4 +14,5 @@ Route::controller(InboxController::class)
     ->prefix('inbox')
     ->group(function () {
         Route::get('/', 'index')->name('inbox.index');
+        Route::post('/filter', 'filter')->name('inbox.filter');
     });
