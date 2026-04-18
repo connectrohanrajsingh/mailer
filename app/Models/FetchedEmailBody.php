@@ -10,7 +10,7 @@ class FetchedEmailBody extends Model
         'email_id',
         'body_text',
         'body_html',
-        'raw_body',
+        'body_raw',
         'flags',
         'headers',
     ];

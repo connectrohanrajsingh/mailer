@@ -25,6 +25,8 @@ return new class extends Migration {
             $table->string('in_reply_to')->nullable();
             $table->unsignedTinyInteger('have_attachments')->default(0);
             $table->unsignedTinyInteger('processed')->default(0);
+            $table->timestamp('processed_at')->nullable();
+            $table->string('status', 255)->nullable();
             $table->timestamps();
 
             $table->unique(['folder', 'uid'], 'unq_folder_uid');
@@ -40,7 +42,6 @@ return new class extends Migration {
 
             $table->longText('body_text')->nullable();
             $table->longText('body_html')->nullable();
-            $table->longText('raw_body')->nullable();                 // raw MIME body (fallback)
             $table->json('flags')->nullable();                        // extra flags
             $table->json('headers')->nullable();                      // raw headers
             $table->timestamps();

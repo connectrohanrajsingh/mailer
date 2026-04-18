@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\FetchedEmailOverview;
 use App\Models\FetchedEmailTracker;
 use App\Services\MailClient;
+use App\Services\MailHelper;
 use Illuminate\Console\Command;
 use Carbon\Carbon;
 use Exception;
@@ -28,13 +29,6 @@ class FetchEmailsOverview extends Command
 
         $mailsPerFetch       = config('imap.accounts.imap.mails_per_fetch');
         $this->mailsPerFetch = $mailsPerFetch <= $this->maxMailsPerFetch ? $mailsPerFetch : $this->maxMailsPerFetch;
-    }
-
-    private function makeMessageIdHashed($messageId)
-    {
-        $normalized = strtolower(trim($messageId));
-        $hash       = hash('sha256', $normalized);
-        return $hash;
     }
 
     private function getTracker($folder)
@@ -118,6 +112,10 @@ class FetchEmailsOverview extends Command
             if (empty($messageId)) {
                 continue;
             }
+
+            if (empty($uid)) {
+                continue;
+            }
             try {
                 $parsedDate = Carbon::parse((string) $header['date']);
                 $parsedDate = $parsedDate->isFuture() ? $currentTime : $parsedDate;
@@ -130,7 +128,7 @@ class FetchEmailsOverview extends Command
                 'folder'            => $this->imapFolder,
                 'uid'               => $uid,
                 'message_id'        => $messageId,
-                'message_id_hashed' => $this->makeMessageIdHashed($messageId),
+                'message_id_hashed' => MailHelper::makeIdHashed($messageId),
                 'date'              => $parsedDate,
                 'created_at'        => $currentTime,
                 'updated_at'        => $currentTime

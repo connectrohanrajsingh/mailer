@@ -10,3 +10,4 @@ Artisan::command('inspire', function () {
 
 
 Schedule::command('emails:overview')->everyTwoMinutes()->withoutOverlapping();
+Schedule::command('emails:fetch')->everyTenMinutes()->withoutOverlapping();

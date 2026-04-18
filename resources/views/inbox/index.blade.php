@@ -3,10 +3,10 @@
 
 @section('content')
     <div class="app-content pt-3 p-md-3 p-lg-4">
-        <div class="container-xl">
+        <div class="container-fluid">
             <div class="row g-3 mb-4 align-items-center justify-content-between">
                 <div class="col-auto">
-                    <h1 class="app-page-title mb-0">Orders</h1>
+                    <h1 class="app-page-title mb-0">Inbox</h1>
                 </div>
                 <div class="col-auto">
                     <div class="page-utilities">
@@ -15,27 +15,35 @@
                                 <form class="table-search-form row gx-1 align-items-center" action="{{ route('inbox.filter') }}" method="POST">
                                     @csrf
                                     <div class="col-auto">
-                                        <input type="text" name="sv" id="search-orders" class="form-control search-orders" placeholder="Search" value="{{ request('sv') }}">
+                                        <input type="text" name="search_value" id="search-orders" class="form-control search-orders" placeholder="Search" value="{{ request('search_value') }}">
                                     </div>
 
                                     <div class="col-auto">
-                                        <select name="fo" class="form-select w-auto">
+                                        <select name="fetch_option" class="form-select w-auto">
                                             @foreach ($filterOptions as $filterOption)
-                                                <option value="{{ $filterOption['value'] }}" @selected($filterOption['value'] == request('fo'))>{{ $filterOption['label'] }}</option>
+                                                <option value="{{ $filterOption['value'] }}" @selected($filterOption['value'] == request('fetch_option'))>{{ $filterOption['label'] }}</option>
                                             @endforeach
                                         </select>
                                     </div>
 
                                     <div class="col-auto">
-                                        <select name="fc" class="form-select w-auto">
+                                        <select name="fetch_criteria" class="form-select w-auto">
                                             @foreach ($filterCondition as $condition)
-                                                <option value="{{ $condition['value'] }}" @selected($condition['value'] == request('fc'))>{{ $condition['label'] }}</option>
+                                                <option value="{{ $condition['value'] }}" @selected($condition['value'] == request('fetch_criteria'))>{{ $condition['label'] }}</option>
                                             @endforeach
                                         </select>
                                     </div>
 
                                     <div class="col-auto">
                                         <button type="submit" class="btn app-btn-secondary">Search</button>
+                                    </div>
+                                    <div class="col-auto">
+                                        <a type="submit" class="btn app-btn-secondary" href="{{ route('inbox.index') }}">
+                                            <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-folder" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M9.828 4a3 3 0 0 1-2.12-.879l-.83-.828A1 1 0 0 0 6.173 2H2.5a1 1 0 0 0-1 .981L1.546 4h-1L.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3v1z" />
+                                                <path fill-rule="evenodd" d="M13.81 4H2.19a1 1 0 0 0-.996 1.09l.637 7a1 1 0 0 0 .995.91h10.348a1 1 0 0 0 .995-.91l.637-7A1 1 0 0 0 13.81 4zM2.19 3A2 2 0 0 0 .198 5.181l.637 7A2 2 0 0 0 2.826 14h10.348a2 2 0 0 0 1.991-1.819l.637-7A2 2 0 0 0 13.81 3H2.19z" />
+                                            </svg>
+                                        </a>
                                     </div>
                                 </form>
                             </div>
@@ -44,7 +52,7 @@
                 </div>
             </div>
 
-            <div class="row" id="orders-all">
+            <div class="row" id="inbox">
                 <div class="app-card app-card-orders-table shadow-sm mb-5">
                     <div class="app-card-body">
                         <div class="table-responsive">
@@ -64,7 +72,7 @@
                                         <tr>
                                             <td class="cell">{{ $email->sender_email }}</td>
                                             <td class="cell">{{ $email->sender_name }}</td>
-                                            <td class="cell">{{ $email->subject }}</td>
+                                            <td class="cell">{{ Str::limit($email->subject, 50) }}</td>
                                             <td class="cell">{{ $email->date }}</td>
                                             <td class="cell">{{ $email->created_at }}</td>
                                             <td class="cell">{{ $email->have_attachments }}</td>

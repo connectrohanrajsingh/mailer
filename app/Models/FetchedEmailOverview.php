@@ -25,7 +25,9 @@ class FetchedEmailOverview extends Model
         'thread_id',
         'in_reply_to',
         'have_attachments',
-        'processed'
+        'processed',
+        'processed_at',
+        'status',
     ];
 
     protected $casts = [
@@ -56,27 +58,11 @@ class FetchedEmailOverview extends Model
 
     protected static function booted()
     {
-        static::creating(function ($model) {
-            if (!empty($model->message_id)) {
-                $model->message_id_hashed = self::normalizedHashedMessageId($model->message_id);
-            }
-
+        static::updating(function ($model) {
             if (!empty($model->sender_email)) {
                 $model->sender_email = strtolower(trim($model->sender_email));
             }
         });
-    }
-
-    public static function existsByMessageId(string $messageId, string $folder): bool
-    {
-        return self::where(['folder' => $folder, 'message_id_hashed' => self::normalizedHashedMessageId($messageId)])->exists();
-    }
-
-    public static function normalizedHashedMessageId(string $messageId): string
-    {
-        $normalized = strtolower(trim($messageId));
-        $hash       = hash('sha256', $normalized);
-        return $hash;
     }
 
 }

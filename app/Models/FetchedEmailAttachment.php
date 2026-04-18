@@ -40,6 +40,7 @@ class FetchedEmailAttachment extends Model
 
     public function getUrl()
     {
-        return Storage::disk($this->storage_disk)->url($this->storage_path);
+        $filePath = "{$this->storage_path}/{$this->name}";
+        return Storage::disk($this->storage_disk)->url($filePath);
     }
 }
