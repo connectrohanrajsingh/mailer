@@ -6,8 +6,9 @@ use App\Models\FetchedEmailOverview;
 use App\Services\CachedData;
 use Illuminate\Http\Request;
 
-class InboxController extends Controller
+class OutboxController extends Controller
 {
+
     private function applyFilters(Request $request, $queryBuilder, $filterOptions, $filterCondition)
     {
         $reqOption   = $request->input('fetch_option');

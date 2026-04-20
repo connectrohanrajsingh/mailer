@@ -1,0 +1,9 @@
+<svg width="256px" height="256px" viewBox="0 0 256 256" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <g id="ProfileIcon" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Male-User" transform="translate(64.000000, 60.000000)" fill="#51B37F">
+            <circle id="Head" cx="64" cy="40" r="32"></circle>
+            
+            <path d="M0,112 C0,96 16,84 32,84 H96 C112,84 128,96 128,112 V132 H0 V112 Z" id="Body"></path>
+        </g>
+    </g>
+</svg>

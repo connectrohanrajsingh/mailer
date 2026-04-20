@@ -40,7 +40,13 @@ class FetchedEmailAttachment extends Model
 
     public function getUrl()
     {
-        $filePath = "{$this->storage_path}/{$this->name}";
-        return Storage::disk($this->storage_disk)->url($filePath);
+        return route('attachment.show', ['inbox', $this->id]);
     }
+
+    public function getDownloadUrl()
+    {
+        return route('attachment.download', ['inbox', $this->id]);
+    }
+
+
 }

@@ -39,10 +39,7 @@
                                     </div>
                                     <div class="col-auto">
                                         <a type="submit" class="btn app-btn-secondary" href="{{ route('inbox.index') }}">
-                                            <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-folder" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M9.828 4a3 3 0 0 1-2.12-.879l-.83-.828A1 1 0 0 0 6.173 2H2.5a1 1 0 0 0-1 .981L1.546 4h-1L.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3v1z" />
-                                                <path fill-rule="evenodd" d="M13.81 4H2.19a1 1 0 0 0-.996 1.09l.637 7a1 1 0 0 0 .995.91h10.348a1 1 0 0 0 .995-.91l.637-7A1 1 0 0 0 13.81 4zM2.19 3A2 2 0 0 0 .198 5.181l.637 7A2 2 0 0 0 2.826 14h10.348a2 2 0 0 0 1.991-1.819l.637-7A2 2 0 0 0 13.81 3H2.19z" />
-                                            </svg>
+                                            <i class="fa fa-refresh"></i>
                                         </a>
                                     </div>
                                 </form>
@@ -56,7 +53,7 @@
                 <div class="app-card app-card-orders-table shadow-sm mb-5">
                     <div class="app-card-body">
                         <div class="table-responsive">
-                            <table class="table app-table-hover mb-0 text-left">
+                            <table class="table app-table-hover table-striped mb-0 text-left">
                                 <thead>
                                     <tr>
                                         <th class="cell">Sender Email</th>
@@ -64,18 +61,24 @@
                                         <th class="cell">Subject</th>
                                         <th class="cell">Email Date</th>
                                         <th class="cell">Received Date</th>
-                                        <th class="cell">Attachments</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($emails as $email)
                                         <tr>
-                                            <td class="cell">{{ $email->sender_email }}</td>
+                                            <td class="cell">
+                                                {{ $email->sender_email }} 
+                                                 @if($email->have_attachments) 📎 @endif
+                                                </td>
                                             <td class="cell">{{ $email->sender_name }}</td>
                                             <td class="cell">{{ Str::limit($email->subject, 50) }}</td>
                                             <td class="cell">{{ $email->date }}</td>
                                             <td class="cell">{{ $email->created_at }}</td>
-                                            <td class="cell">{{ $email->have_attachments }}</td>
+                                            <td class="cell text-center">
+                                                <a href="{{ route('inbox.show', $email->id) }}" class="text-success">
+                                                    <i class="fa fa-eye w-100"></i>
+                                                </a>
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -145,7 +148,6 @@
                         </nav>
                     </div>
 
-
                     <div class="col-auto">
                         <div class="page-utilities">
                             <div class="row g-2 justify-content-start justify-content-md-end align-items-center">
@@ -177,36 +179,5 @@
 @endsection
 
 @push('after-scripts')
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    @if(session('success'))
-        <script>
-            Swal.fire({
-                title: 'Success!',
-                text: "{{ session('success') }}",
-                icon: 'success',
-                confirmButtonText: 'OK'
-            });
-        </script>
-    @endif
-
-    @if(session('error'))
-        <script>
-            Swal.fire({
-                title: 'Error!',
-                text: "{{ session('error') }}",
-                icon: 'error',
-                confirmButtonText: 'OK'
-            });
-        </script>
-    @endif
-
-    @if ($errors->any())
-        <script>
-            Swal.fire({
-                title: 'Validation Error!',
-                html: `{!! implode('<br>', $errors->all()) !!}`,
-                icon: 'error'
-            });
-        </script>
-    @endif
+    @include('partials/sweetalert')
 @endpush

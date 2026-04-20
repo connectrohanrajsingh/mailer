@@ -39,13 +39,12 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('sent_email_id')->constrained('sent_emails')->onDelete('cascade');
 
+            $table->string('email', 255);
             $table->string('name');
+            $table->string('name_uuid', 64);
             $table->string('mime_type')->nullable();
             $table->integer('size')->nullable();
-
-            $table->string('content_id')->nullable();
             $table->string('checksum', 64)->nullable()->index();
-
             $table->string('storage_disk', 50);
             $table->string('storage_path', 1024);
             $table->timestamps();

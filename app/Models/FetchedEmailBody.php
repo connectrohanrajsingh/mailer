@@ -25,14 +25,4 @@ class FetchedEmailBody extends Model
         return $this->belongsTo(FetchedEmailOverview::class, 'email_id');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Helper Methods
-    |--------------------------------------------------------------------------
-    */
-
-    public function getHeader($key)
-    {
-        return $this->headers[$key] ?? null;
-    }
 }

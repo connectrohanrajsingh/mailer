@@ -21,7 +21,6 @@ class FetchedEmailOverview extends Model
         'answered',
         'flagged',
         'date',
-        'received_date',
         'thread_id',
         'in_reply_to',
         'have_attachments',

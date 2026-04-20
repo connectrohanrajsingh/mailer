@@ -206,6 +206,7 @@ class FetchEmails extends Command
                         'mime_type'    => $attachment->getMimeType(),
                         'size'         => $attachment->getSize(),
                         'disposition'  => $attachment->getDisposition() ?? 'attachment',
+                        'inline'       => $attachment->getDisposition() === 'inline',
                         'content_id'   => $attachment->getContentId(),
                         'storage_disk' => 'local',
                         'storage_path' => $path,
