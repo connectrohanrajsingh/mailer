@@ -2,18 +2,22 @@
 namespace App\Http\Controllers;
 
 use App\Models\FetchedEmailAttachment;
-use App\Models\SendEmailAttachment;
+use App\Models\SentEmailAttachment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 
 class AttachmentController extends Controller
 {
     private function getAttachment($emailBox, $id)
     {
+        $defaultEmailbox = Str::lower(config('imap.accounts.imap.folder'));
+
         return match ($emailBox) {
             'inbox' => FetchedEmailAttachment::findOrFail($id),
-            'outbox' => SendEmailAttachment::findOrFail($id),
+            $defaultEmailbox => FetchedEmailAttachment::findOrFail($id),
+            'outbox' => SentEmailAttachment::findOrFail($id),
             default => abort(404, 'Invalid mailbox')
         };
     }

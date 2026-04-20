@@ -98,21 +98,6 @@ class FetchEmails extends Command
             $bodyText = $email->getTextBody();
             $bodyHtml = $email->getHTMLBody();
 
-            // // HTML → TEXT fallback
-            // if (empty($bodyText) && !empty($bodyHtml)) {
-            //     $bodyText = html_entity_decode(strip_tags($bodyHtml));
-            // }
-
-            // // TEXT → HTML fallback
-            // if (empty($bodyHtml) && !empty($bodyText)) {
-            //     $bodyHtml = nl2br(e($bodyText));
-            // }
-
-
-            // if (empty($bodyText) && empty($bodyHtml)) {
-            //     $bodyText = '[EMPTY BODY]';
-            // }
-
             FetchedEmailBody::create([
                 'email_id'  => $overview->id,
                 'body_text' => $bodyText,

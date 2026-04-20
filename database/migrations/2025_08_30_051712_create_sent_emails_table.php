@@ -13,7 +13,6 @@ return new class extends Migration {
         Schema::create('sent_emails', function (Blueprint $table) {
             $table->id();
 
-            $table->string('message_id')->nullable()->index();
             $table->string('from_email', 255);
             $table->string('from_name', 255)->nullable();
             $table->string('subject', 800)->nullable();
@@ -23,15 +22,12 @@ return new class extends Migration {
             $table->json('bcc_emails')->nullable();
             $table->json('reply_to')->nullable();
 
-            $table->longText('text_body')->nullable();
-
-            $table->integer('attachments_count')->default(0);
-            $table->integer('retry_count')->default(0);
-
-            $table->enum('status', ['QUEUED', 'SENT', 'FAILED'])->default('QUEUED')->index();
-
+            $table->enum('status', ['QUEUED', 'SENT', 'FAILED'])->nullable()->default('QUEUED')->index();
             $table->string('remark', 1200)->nullable();
             $table->dateTime('sent_at')->nullable();
+
+            $table->longText('text_body')->nullable();
+
             $table->timestamps();
         });
 
@@ -39,7 +35,6 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('sent_email_id')->constrained('sent_emails')->onDelete('cascade');
 
-            $table->string('email', 255);
             $table->string('name');
             $table->string('name_uuid', 64);
             $table->string('mime_type')->nullable();

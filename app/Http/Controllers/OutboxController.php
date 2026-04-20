@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\FetchedEmailOverview;
+use App\Models\SentEmail;
+use App\Models\SentEmailAttachment;
 use App\Services\CachedData;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class OutboxController extends Controller
 {
-
     private function applyFilters(Request $request, $queryBuilder, $filterOptions, $filterCondition)
     {
         $reqOption   = $request->input('fetch_option');
@@ -40,7 +43,6 @@ class OutboxController extends Controller
 
         return;
     }
-
 
     public function index(Request $request)
     {
@@ -85,28 +87,76 @@ class OutboxController extends Controller
         return redirect()->route('inbox.index', $validated);
     }
 
-    public function show($emailId)
+    public function send(Request $request)
     {
-        $email = FetchedEmailOverview::with(['body', 'attachments', 'addresses'])->findOrFail($emailId);
+        $validatedData = $request->validate([
+            'to_emails'   => ['required', 'string'],
+            'cc_emails'   => ['nullable', 'string'],
+            'bcc_emails'  => ['nullable', 'string'],
 
+            'subject'     => ['required', 'string', 'max:800'],
+            'text_body'   => ['nullable', 'string'],
+            'attachments' => ['nullable', 'array'],
+        ]);
 
-        $html = $email->body?->body_html;
+        $validatedData['to_emails']  = explode(",", $validatedData['to_emails']) ?? [];
+        $validatedData['cc_emails']  = !empty($validatedData['cc_emails']) ? explode(",", $validatedData['bcc_emails']) : [];
+        $validatedData['bcc_emails'] = !empty($validatedData['bcc_emails']) ? explode(",", $validatedData['bcc_emails']) : [];
 
-        if ($html) {
-            foreach ($email->attachments as $attachment) {
+        try {
+            $sentEmail = SentEmail::create([
+                'to_emails'  => $validatedData['to_emails'],
+                'cc_emails'  => $validatedData['cc_emails'],
+                'bcc_emails' => $validatedData['bcc_emails'],
+                'subject'    => $validatedData['subject'],
+                'text_body'  => $validatedData['text_body'],
+            ]);
 
-                if ($attachment->inline && $attachment->content_id) {
-                    $cid = trim($attachment->content_id, '<>');
-                    $url = $attachment->getUrl();
+            // Handle actual uploaded files
+            if ($request->filled('attachments') && $request->hasFile('attachments')) {
 
-                    $html = str_replace("cid:$cid", $url, $html);
+                $disk = Storage::disk('local');
+                $path = Str::lower("attachments/outbox/{$sentEmail->id}");
+                $disk->makeDirectory($path);
+
+                foreach ($request->file('attachments') as $file) {
+
+                    if ($file->storeAs($path, $uuidName, 'local')) {
+
+                        $uuidName = str_replace('-', '', Str::uuid()->toString());
+                        $filename = $file->getClientOriginalName();
+
+                        $extension = Str::lower(pathinfo($filename, PATHINFO_EXTENSION));
+                        if (!empty($extension)) {
+                            $uuidName .= ".$extension";
+                        }
+
+                        $checksum = hash_file('sha256', $file->getRealPath());
+
+                        SentEmailAttachment::create([
+                            'email_id'     => $sentEmail->id,
+                            'name'         => $filename,
+                            'name_uuid'    => $uuidName,
+                            'mime_type'    => $file->getClientMimeType(),
+                            'size'         => $file->getSize(),
+                            'checksum'     => $checksum,
+                            'storage_disk' => 'local',
+                            'storage_path' => $path,
+                        ]);
+                    }
                 }
             }
+
+            return redirect()->back()->with('success', 'Mail queued to send');
         }
+        catch (\Exception $e) {
+            \Log::error('Mail Queue Failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
 
-        $email->rendered_body = $html;
-
-        $context = ['email' => $email];
-        return view('inbox.details', $context);
+            return redirect()->back()->with('error', 'Failed to queue the mail');
+        }
     }
+
 }
