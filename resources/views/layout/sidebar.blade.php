@@ -64,7 +64,7 @@
 
 
                     <li class="nav-item">
-                        <a class="nav-link" href="https://themes.3rdwavemedia.com/bootstrap-templates/admin-dashboard/portal-free-bootstrap-admin-dashboard-template-for-developers/" target="_blank" rel="noopener">
+                        <a class="nav-link" href="https://github.com/connectrohanrajsingh/mailer.git" target="_blank" rel="noopener">
                             <span class="nav-icon">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" fill="currentColor" viewBox="0 0 16 16">
                                     <path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 
