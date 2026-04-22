@@ -1,59 +1,284 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
-
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <a href="#"><img src="https://img.shields.io/badge/build-passing-brightgreen" alt="Build Status"></a>
+  <a href="#"><img src="https://img.shields.io/badge/version-1.0-blue" alt="Version"></a>
+  <a href="#"><img src="https://img.shields.io/badge/license-MIT-lightgrey" alt="License"></a>
 </p>
 
-## About Laravel
+## About Mailer
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Mailer is a lightweight and efficient mail management application designed to simplify email handling through flexible configuration and a clean interface. It provides seamless integration with standard mail protocols, making it easy to manage both incoming and outgoing emails.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+The application supports both IMAP and SMTP configurations, allowing users to fetch and send emails reliably across different mail servers.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Features
 
-## Learning Laravel
+* IMAP support for fetching emails from configured mailboxes
+* SMTP support for sending emails securely
+* Easy configuration of mail servers via environment variables (`.env`)
+* Compose and send emails directly from the interface
+* Organized inbox and outbox handling
+* Clean and minimal user experience for fast workflows
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+This approach ensures flexibility and security while keeping your credentials outside the codebase.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Usage
 
-## Laravel Sponsors
+* Configure your mail servers in the `.env` file
+* Access the application dashboard
+* View incoming emails via IMAP
+* Compose and send emails using SMTP
+* Manage your inbox and outbox efficiently
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## IMAP Configuration
 
-### Premium Partners
+The application allows flexible IMAP configuration for fetching emails from your mail server. All settings are controlled via environment variables.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Available Options
+
+```env
+IMAP_HOST=
+IMAP_PORT=
+IMAP_PROTOCOL=
+IMAP_ENCRYPTION=
+IMAP_VALIDATE_CERT=
+IMAP_USERNAME=
+IMAP_PASSWORD=
+IMAP_FOLDER=
+IMAP_START_DATE=
+IMAP_MAILS_PER_FETCH=
+```
+
+### Description
+
+* **IMAP_HOST** – Mail server host (e.g., `imap.gmail.com`)
+
+* **IMAP_PORT** – Port number (e.g., `993`)
+
+* **IMAP_PROTOCOL** – Protocol type (`imap`)
+
+* **IMAP_ENCRYPTION** – Encryption method (`ssl`, `tls`, or `null`)
+
+* **IMAP_VALIDATE_CERT** – Enable/disable certificate validation (`true/false`)
+
+* **IMAP_USERNAME** – Email address or username
+
+* **IMAP_PASSWORD** – Mail account password or app password
+
+* **IMAP_FOLDER** – Mailbox folder to fetch from (e.g., `INBOX`)
+
+* **IMAP_START_DATE** –
+  Defines the starting point for fetching emails.
+
+  * If provided → emails will be fetched from this date onward
+  * If not provided → fetching starts from the current date
+
+* **IMAP_MAILS_PER_FETCH** –
+  Controls how many emails are fetched per connection.
+
+  * Helps optimize performance and avoid overload
+  * Maximum allowed value: **150**
+  * Recommended to keep it within a reasonable range for stability
+
+### Behavior
+
+* On each connection, the system fetches emails based on:
+
+  * Defined date range (via `IMAP_START_DATE`)
+  * Fetch limit (via `IMAP_MAILS_PER_FETCH`)
+* Ensures controlled and efficient email synchronization
+* Prevents excessive load by enforcing fetch limits
+
+### Example
+
+```env
+IMAP_HOST=imap.gmail.com
+IMAP_PORT=993
+IMAP_PROTOCOL=imap
+IMAP_ENCRYPTION=ssl
+IMAP_VALIDATE_CERT=true
+IMAP_USERNAME=example@gmail.com
+IMAP_PASSWORD=yourpassword
+IMAP_FOLDER=INBOX
+IMAP_START_DATE=2026-01-01
+IMAP_MAILS_PER_FETCH=100
+```
+
+## SMTP Configuration
+
+The application provides flexible SMTP configuration for sending emails through your preferred mail server. All settings are managed via environment variables.
+
+### Available Options
+
+```env id="smtp9x2"
+SMTP_HOST=
+SMTP_PORT=
+SMTP_ENCRYPTION=
+SMTP_USERNAME=
+SMTP_PASSWORD=
+SMTP_FROM_ADDRESS=
+SMTP_FROM_NAME=
+SMTP_TIMEOUT=
+SMTP_AUTH_MODE=
+```
+
+### Description
+
+* **SMTP_HOST** – Mail server host (e.g., `smtp.gmail.com`)
+
+* **SMTP_PORT** – Port number (e.g., `587` for TLS, `465` for SSL)
+
+* **SMTP_ENCRYPTION** – Encryption type (`tls`, `ssl`, or `null`)
+
+* **SMTP_USERNAME** – Email address or username
+
+* **SMTP_PASSWORD** – Mail account password or app password
+
+* **SMTP_FROM_ADDRESS** –
+  Default sender email address used while sending mails
+
+* **SMTP_FROM_NAME** –
+  Display name for outgoing emails (e.g., App or User name)
+
+* **SMTP_TIMEOUT** –
+  Connection timeout in seconds (optional, improves reliability)
+
+* **SMTP_AUTH_MODE** –
+  Authentication mode if required by the server (`login`, `plain`, etc.)
+
+### Behavior
+
+* Used for sending emails from the application
+* Works seamlessly with the compose mail feature
+* Supports secure connections via SSL/TLS
+* Ensures reliable delivery with configurable timeout and authentication
+
+### Example
+
+```env id="smtpEx1"
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_ENCRYPTION=tls
+SMTP_USERNAME=example@gmail.com
+SMTP_PASSWORD=yourpassword
+SMTP_FROM_ADDRESS=example@gmail.com
+SMTP_FROM_NAME=Mailer App
+SMTP_TIMEOUT=30
+SMTP_AUTH_MODE=login
+```
+
+## Scheduled Jobs
+
+The application uses Laravel’s scheduler to efficiently manage email synchronization in two stages: quick overview fetching and detailed mail retrieval.
+
+### Configuration
+
+```php
+use Illuminate\Support\Facades\Schedule;
+
+Schedule::command('emails:overview')->everyTwoMinutes()->withoutOverlapping();
+Schedule::command('emails:fetch')->everyTenMinutes()->withoutOverlapping();
+```
+
+### How It Works
+
+* **emails:overview**
+
+  * Runs every **2 minutes**
+  * Performs a **fast, lightweight fetch**
+  * Retrieves basic metadata (e.g., subject, sender, timestamps)
+  * Helps keep the inbox quickly updated with minimal load
+
+* **emails:fetch**
+
+  * Runs every **10 minutes**
+  * Performs a **detailed fetch of emails**
+  * Completes and fills in full email content (body, attachments, etc.)
+  * Ensures all messages are fully synchronized
+ 
+  
+* **Verify Scheduler**
+
+You can manually test the scheduler using:
+```php
+ php artisan schedule:run
+```
+
+### Behavior
+
+* The system follows a **two-phase sync strategy**:
+
+  1. Quick overview for instant visibility
+  2. Background detailed fetch for completeness
+
+* `withoutOverlapping()` ensures:
+
+  * No duplicate executions
+  * Prevents race conditions and server overload
+
+* Optimized for:
+
+  * Performance
+  * Scalability
+  * Smooth user experience without delays
+
+This approach ensures users can see new emails almost instantly, while full data is populated seamlessly in the background.
+
+
+## Queue Worker (Email Sending)
+
+The application uses a background queue worker to handle outgoing emails efficiently. Instead of sending emails instantly during user actions, they are pushed to a queue and processed asynchronously.
+
+### How It Works
+
+* When a user composes and sends an email:
+
+  * The email is added to a **queue**
+  * The request returns immediately without delay
+
+* A **queue worker** processes the jobs in the background:
+
+  * Picks queued emails
+  * Sends them via SMTP configuration
+  * Updates status (sent/failed) accordingly
+
+### Benefits
+
+* Faster user experience (no waiting for mail sending)
+* Reliable delivery with retry mechanisms
+* Scalable for high-volume email sending
+* Prevents request timeouts
+
+### Running the Worker
+
+Start the queue worker using:
+
+```bash id="wrk12x"
+php artisan queue:work
+```
+
+For continuous production usage, it is recommended to use a process manager like Supervisor:
+
+```bash id="wrk22y"
+php artisan queue:work --tries=3 --timeout=90
+```
+
+### Behavior
+
+* Emails are sent in the background via the configured SMTP server
+* Failed jobs can be retried automatically based on queue settings
+* Ensures smooth and non-blocking email delivery
+
+This architecture keeps the system responsive while ensuring reliable email dispatching.
+
 
 ## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Contributions are welcome. If you'd like to improve the project, feel free to fork the repository and submit a pull request.
 
-## Code of Conduct
+## Security
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+If you discover any security issues, please report them responsibly so they can be addressed promptly.
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is open-sourced software licensed under the MIT license.
