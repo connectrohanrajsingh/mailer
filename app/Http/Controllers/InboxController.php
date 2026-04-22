@@ -3,44 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\FetchedEmailOverview;
+use App\Services\ApplyFilters;
 use App\Services\CachedData;
 use Illuminate\Http\Request;
 
 class InboxController extends Controller
 {
-    private function applyFilters(Request $request, $queryBuilder, $filterOptions, $filterCondition)
-    {
-        $reqOption   = $request->input('fetch_option');
-        $reqCriteria = $request->input('fetch_criteria');
-        $reqSearch   = $request->input('search_value');
-
-        if (!$reqOption || !$reqCriteria || !$reqSearch) {
-            return;
-        }
-
-        $filterOptions   = array_column($filterOptions, 'value');
-        $filterCondition = array_column($filterCondition, 'value');
-
-        if (!in_array($reqOption, $filterOptions, TRUE) || !in_array($reqCriteria, $filterCondition, TRUE)) {
-            \Log::warning('Invalid filter option or criteria', ['options' => $reqOption, 'criteria' => $reqCriteria]);
-            return;
-        }
-
-        switch ($reqCriteria) {
-            case 'exact_match':
-                $queryBuilder->where($reqOption, $reqSearch);
-                break;
-
-            case 'exists':
-                $search = addcslashes($reqSearch, '%_');
-                $queryBuilder->where($reqOption, 'LIKE', "%{$search}%");
-                break;
-        }
-
-        return;
-    }
-
-
     public function index(Request $request)
     {
         $filterOptions   = CachedData::getJson("static/inbox", 'filter-options');
@@ -55,7 +23,7 @@ class InboxController extends Controller
         }
 
         $queryBuilder = FetchedEmailOverview::where('processed', TRUE)->orderBy("created_at", "desc");
-        $this->applyFilters($request, $queryBuilder, $filterOptions, $filterCondition);
+        app(ApplyFilters::class)->applyFilters($request, $queryBuilder, $filterOptions, $filterCondition);
         $emails = $queryBuilder->paginate(10)->withQueryString();
 
         $context = [
@@ -87,7 +55,6 @@ class InboxController extends Controller
     public function show($emailId)
     {
         $email = FetchedEmailOverview::with(['body', 'attachments', 'addresses'])->findOrFail($emailId);
-
 
         $html = $email->body?->body_html;
 

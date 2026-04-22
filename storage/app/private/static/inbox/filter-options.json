@@ -1,0 +1,14 @@
+[
+    {
+        "value": "sender_email",
+        "label": "Sender Email"
+    },
+    {
+        "value": "sender_name",
+        "label": "Sender Name"
+    },
+    {
+        "value": "subject",
+        "label": "Subject"
+    }
+]

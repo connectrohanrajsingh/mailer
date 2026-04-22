@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\FetchedEmailOverview;
+use App\Jobs\SendEmailJob;
 use App\Models\SentEmail;
 use App\Models\SentEmailAttachment;
+use App\Services\ApplyFilters;
 use App\Services\CachedData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -12,42 +13,10 @@ use Illuminate\Support\Str;
 
 class OutboxController extends Controller
 {
-    private function applyFilters(Request $request, $queryBuilder, $filterOptions, $filterCondition)
-    {
-        $reqOption   = $request->input('fetch_option');
-        $reqCriteria = $request->input('fetch_criteria');
-        $reqSearch   = $request->input('search_value');
-
-        if (!$reqOption || !$reqCriteria || !$reqSearch) {
-            return;
-        }
-
-        $filterOptions   = array_column($filterOptions, 'value');
-        $filterCondition = array_column($filterCondition, 'value');
-
-        if (!in_array($reqOption, $filterOptions, TRUE) || !in_array($reqCriteria, $filterCondition, TRUE)) {
-            \Log::warning('Invalid filter option or criteria', ['options' => $reqOption, 'criteria' => $reqCriteria]);
-            return;
-        }
-
-        switch ($reqCriteria) {
-            case 'exact_match':
-                $queryBuilder->where($reqOption, $reqSearch);
-                break;
-
-            case 'exists':
-                $search = addcslashes($reqSearch, '%_');
-                $queryBuilder->where($reqOption, 'LIKE', "%{$search}%");
-                break;
-        }
-
-        return;
-    }
-
     public function index(Request $request)
     {
-        $filterOptions   = CachedData::getJson("static/inbox", 'filter-options');
-        $filterCondition = CachedData::getJson("static/inbox", 'filter-conditions');
+        $filterOptions   = CachedData::getJson("static/outbox", 'filter-options');
+        $filterCondition = CachedData::getJson("static/outbox", 'filter-conditions');
 
         if (!$filterOptions) {
             abort(500, 'Filter option not found');
@@ -57,9 +26,17 @@ class OutboxController extends Controller
             abort(500, 'Filter criteria not found');
         }
 
-        $queryBuilder = FetchedEmailOverview::where('processed', TRUE)->orderBy("created_at", "desc");
-        $this->applyFilters($request, $queryBuilder, $filterOptions, $filterCondition);
+        $queryBuilder = SentEmail::select(['id', 'to_emails', 'to_name', 'subject', 'created_at', 'sent_at'])
+            ->withCount('attachments')
+            ->orderBy("created_at", "desc");
+
+        app(ApplyFilters::class)->applyFilters($request, $queryBuilder, $filterOptions, $filterCondition);
         $emails = $queryBuilder->paginate(10)->withQueryString();
+
+        $emails->map(function ($email) {
+            $email->to_emails = implode(", ", $email->to_emails);
+        });
+
 
         $context = [
             'emails'          => $emails,
@@ -67,7 +44,7 @@ class OutboxController extends Controller
             'filterCondition' => $filterCondition
         ];
 
-        return view('inbox.index', $context);
+        return view('outbox.index', $context);
     }
 
     public function filter(Request $request)
@@ -84,24 +61,53 @@ class OutboxController extends Controller
                 'fetch_criteria.required' => 'Filter criteria is required',
             ]
         );
-        return redirect()->route('inbox.index', $validated);
+        return redirect()->route('outbox.index', $validated);
     }
 
-    public function send(Request $request)
-    {
-        $validatedData = $request->validate([
-            'to_emails'   => ['required', 'string'],
-            'cc_emails'   => ['nullable', 'string'],
-            'bcc_emails'  => ['nullable', 'string'],
 
+    public function compose($emailId = null)
+    {
+        return view("outbox.compose");
+    }
+
+
+    public function store(Request $request)
+    {
+        $emailRegex = "/^([a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})(\s*,\s*[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})*$/";
+
+        $validatedData = $request->validate([
+            'to_emails'   => ['required', 'string', "regex:$emailRegex"],
+            'cc_emails'   => ['nullable', 'string', "regex:$emailRegex"],
+            'bcc_emails'  => ['nullable', 'string', "regex:$emailRegex"],
+
+            'to_name'     => ['nullable', 'string', 'max:120'],
             'subject'     => ['required', 'string', 'max:800'],
-            'text_body'   => ['nullable', 'string'],
+            'body'        => ['nullable', 'string'],
             'attachments' => ['nullable', 'array'],
         ]);
 
-        $validatedData['to_emails']  = explode(",", $validatedData['to_emails']) ?? [];
-        $validatedData['cc_emails']  = !empty($validatedData['cc_emails']) ? explode(",", $validatedData['bcc_emails']) : [];
-        $validatedData['bcc_emails'] = !empty($validatedData['bcc_emails']) ? explode(",", $validatedData['bcc_emails']) : [];
+
+        $validatedData['to_emails'] = collect(explode(',', $validatedData['to_emails']))
+            ->map(fn($e) => trim($e))
+            ->filter()
+            ->values()
+            ->toArray();
+
+        $validatedData['cc_emails'] = !empty($validatedData['cc_emails'])
+            ? collect(explode(',', $validatedData['cc_emails']))
+                ->map(fn($e) => trim($e))
+                ->filter()
+                ->values()
+                ->toArray()
+            : [];
+
+        $validatedData['bcc_emails'] = !empty($validatedData['bcc_emails'])
+            ? collect(explode(',', $validatedData['bcc_emails']))
+                ->map(fn($e) => trim($e))
+                ->filter()
+                ->values()
+                ->toArray()
+            : [];
 
         try {
             $sentEmail = SentEmail::create([
@@ -109,11 +115,12 @@ class OutboxController extends Controller
                 'cc_emails'  => $validatedData['cc_emails'],
                 'bcc_emails' => $validatedData['bcc_emails'],
                 'subject'    => $validatedData['subject'],
-                'text_body'  => $validatedData['text_body'],
+                'to_name'    => $validatedData['to_name'],
+                'body'       => $validatedData['body'],
             ]);
 
             // Handle actual uploaded files
-            if ($request->filled('attachments') && $request->hasFile('attachments')) {
+            if ($request->hasFile('attachments')) {
 
                 $disk = Storage::disk('local');
                 $path = Str::lower("attachments/outbox/{$sentEmail->id}");
@@ -121,15 +128,15 @@ class OutboxController extends Controller
 
                 foreach ($request->file('attachments') as $file) {
 
-                    if ($file->storeAs($path, $uuidName, 'local')) {
+                    $filename = $file->getClientOriginalName();
+                    $uuidName = str_replace('-', '', Str::uuid()->toString());
 
-                        $uuidName = str_replace('-', '', Str::uuid()->toString());
-                        $filename = $file->getClientOriginalName();
+                    $extension = Str::lower(pathinfo($filename, PATHINFO_EXTENSION));
+                    if (!empty($extension)) {
+                        $uuidName .= ".$extension";
+                    }
 
-                        $extension = Str::lower(pathinfo($filename, PATHINFO_EXTENSION));
-                        if (!empty($extension)) {
-                            $uuidName .= ".$extension";
-                        }
+                    if ($file->storeAs($path, $filename, 'local')) {
 
                         $checksum = hash_file('sha256', $file->getRealPath());
 
@@ -147,7 +154,8 @@ class OutboxController extends Controller
                 }
             }
 
-            return redirect()->back()->with('success', 'Mail queued to send');
+            SendEmailJob::dispatch($sentEmail->id);
+            return redirect()->route('outbox.index')->with('success', 'Mail queued to send');
         }
         catch (\Exception $e) {
             \Log::error('Mail Queue Failed', [
@@ -155,8 +163,15 @@ class OutboxController extends Controller
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return redirect()->back()->with('error', 'Failed to queue the mail');
+            return redirect()->back()->with('error', 'Failed to queue the mail')->withInput();
         }
+    }
+
+    public function show($emailId)
+    {
+        $email   = SentEmail::with(['attachments'])->findOrFail($emailId);
+        $context = ['email' => $email];
+        return view('outbox.details', $context);
     }
 
 }

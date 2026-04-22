@@ -3,6 +3,7 @@
 use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InboxController;
+use App\Http\Controllers\OutboxController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -22,12 +23,14 @@ Route::middleware(["auth"])
                 Route::post('/filter', 'filter')->name('inbox.filter');
             });
 
-        Route::controller(InboxController::class)
+        Route::controller(OutboxController::class)
             ->prefix('outbox')
             ->group(function () {
                 Route::get('/', 'index')->name('outbox.index');
-                // Route::get('/show/{emailId}', 'show')->name('outbox.show');
-                // Route::post('/filter', 'filter')->name('outbox.filter');
+                Route::post('/filter', 'filter')->name('outbox.filter');
+                Route::get('/compose/{emailId?}', 'compose')->name('outbox.compose');
+                Route::post('/store', 'store')->name('outbox.store');
+                Route::get('/show/{emailId}', 'show')->name('outbox.show');
             });
 
         Route::controller(AttachmentController::class)

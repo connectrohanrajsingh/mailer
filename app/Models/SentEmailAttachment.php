@@ -17,14 +17,6 @@ class SentEmailAttachment extends Model
         'storage_path',
     ];
 
-
-    protected static function booted()
-    {
-        static::creating(function ($model) {
-            $model->email = strtolower(trim($model->email));
-        });
-    }
-
     public function getUrl()
     {
         return route('attachment.show', ['outbox', $this->id]);

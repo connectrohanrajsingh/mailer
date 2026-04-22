@@ -55,9 +55,8 @@ class SendEmail extends Mailable
 
         if ($this->email->attachments()->exists()) {
             foreach ($this->email->attachments as $att) {
-
-                $path = Storage::disk($att->storage_disk)->path($att->storage_path);
-
+                $filePath = "{$att->storage_path}/{$att->name}";
+                $path = Storage::disk($att->storage_disk)->path($filePath);
                 if (file_exists($path)) {
                     $files[] = Attachment::fromPath($path)->as($att->name)->withMime($att->mime_type);
                 }

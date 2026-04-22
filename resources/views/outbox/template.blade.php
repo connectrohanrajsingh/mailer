@@ -114,27 +114,13 @@
 
                     {{-- Greeting --}}
                     <div class="message-greet">
-                        Dear Rohan,
+                        Dear {{$email->to_name ?? 'User'}},
                     </div>
-
-                    <div class="message-body">
-                        Lorem ipsum dolor sit, amet consectetur adipisicing elit.
-                        Eaque, impedit laboriosam praesentium excepturi quod autem repellendus et cumque reprehenderit nostrum quas modi iusto ad harum adipisci ducimus quis recusandae dicta.
-                        Voluptatibus dolore obcaecati nam consequuntur excepturi odit assumenda, dicta, vel corporis repellat earum eaque optio tempora.
-                        Officia iste necessitatibus eveniet, at porro numquam iure nesciunt voluptatibus! Aspernatur officiis temporibus dolorum.
-                    </div>
-
-                    @if(!empty($name))
-                        <p>Dear {{ $name }},</p>
-                    @endif
 
                     {{-- Main Content --}}
-                    @if(!empty($content))
-                        {!! $content !!}
-                    @endif
-
-
-
+                    <div class="message-body">
+                        {!! $email->body !!}
+                    </div>
 
                     {{-- Signature --}}
                     <div class="signature">
@@ -144,7 +130,6 @@
                             <span style="color:#777;">Mailer Team</span>
                         </p>
                     </div>
-
                 </div>
 
                 {{-- FOOTER --}}

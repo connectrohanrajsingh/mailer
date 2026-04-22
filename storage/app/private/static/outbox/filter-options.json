@@ -1,0 +1,14 @@
+[
+    {
+        "value": "to_emails",
+        "label": "Reciever Email"
+    },
+    {
+        "value": "to_name",
+        "label": "Reciever Name"
+    },
+    {
+        "value": "subject",
+        "label": "Subject"
+    }
+]

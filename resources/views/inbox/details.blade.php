@@ -83,7 +83,7 @@
                                             </small>
                                         </div>
 
-                                        <a href="{{ $file->getUrl() }}" target="_blank" class="btn btn-sm btn-primary">Download</a>
+                                        <a href="{{ $file->getUrl() }}" target="_blank" class="btn btn-sm btn-primary text-white">Download</a>
                                     </li>
                                 @endforeach
                             </ul>

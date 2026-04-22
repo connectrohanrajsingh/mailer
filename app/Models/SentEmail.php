@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class SentEmail extends Model
 {
-    protected $fillable = ["from_email", "from_name", "subject", "to_emails", "cc_emails", "bcc_emails", "reply_to", "status", "remark", "sent_at", "text_body"];
+    protected $fillable = ["from_email", "from_name", "to_name", "subject", "to_emails", "cc_emails", "bcc_emails", "reply_to", "status", "remark", "sent_at", "body"];
 
     protected $casts = [
         'to_emails'  => 'json',

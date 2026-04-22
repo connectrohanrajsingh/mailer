@@ -13,27 +13,28 @@ return new class extends Migration {
         Schema::create('sent_emails', function (Blueprint $table) {
             $table->id();
 
-            $table->string('from_email', 255);
+            $table->string('from_email', 255)->nullable();
             $table->string('from_name', 255)->nullable();
             $table->string('subject', 800)->nullable();
 
             $table->json('to_emails');
+            $table->string('to_name', 120)->nullable();
             $table->json('cc_emails')->nullable();
             $table->json('bcc_emails')->nullable();
             $table->json('reply_to')->nullable();
 
-            $table->enum('status', ['QUEUED', 'SENT', 'FAILED'])->nullable()->default('QUEUED')->index();
+            $table->string('status', 20)->nullable()->default('QUEUED')->index();
             $table->string('remark', 1200)->nullable();
             $table->dateTime('sent_at')->nullable();
 
-            $table->longText('text_body')->nullable();
+            $table->longText('body')->nullable();
 
             $table->timestamps();
         });
 
         Schema::create('sent_email_attachments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('sent_email_id')->constrained('sent_emails')->onDelete('cascade');
+            $table->foreignId('email_id')->constrained('sent_emails')->onDelete('cascade');
 
             $table->string('name');
             $table->string('name_uuid', 64);

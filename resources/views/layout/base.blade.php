@@ -35,6 +35,7 @@
 
 		@stack('before-scripts')
 		<!-- Javascript -->
+		<script src="{{ asset('assets/plugins/jquery/jquery.min.js')}}"></script>
 		<script src="{{ asset('assets/plugins/popper.min.js')}}"></script>
 		<script src="{{ asset('assets/plugins/bootstrap/js/bootstrap.min.js')}}"></script>
 		<script src="{{ asset('assets/plugins/sweetalert2/sweetalert2.min.js')}}"></script>

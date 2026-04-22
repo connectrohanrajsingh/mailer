@@ -1,0 +1,10 @@
+[
+    {
+        "value": "exact_match",
+        "label": "Exact Match"
+    },
+    {
+        "value": "exists",
+        "label": "Exists In"
+    }
+]
