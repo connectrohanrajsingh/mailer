@@ -63,9 +63,4 @@ class FetchedEmailOverview extends Model
             }
         });
     }
-
-    public function scopeProcessed($query)
-    {
-        return $query->where('processed', 1);
-    }
 }

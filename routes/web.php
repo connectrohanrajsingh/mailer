@@ -26,8 +26,8 @@ Route::middleware(["auth"])
             ->prefix('outbox')
             ->group(function () {
                 Route::get('/', 'index')->name('outbox.index');
-                Route::get('/show/{emailId}', 'show')->name('outbox.show');
-                Route::post('/filter', 'filter')->name('outbox.filter');
+                // Route::get('/show/{emailId}', 'show')->name('outbox.show');
+                // Route::post('/filter', 'filter')->name('outbox.filter');
             });
 
         Route::controller(AttachmentController::class)
@@ -36,4 +36,7 @@ Route::middleware(["auth"])
                 Route::get('/show/{emailBox}/{attachmentId}', 'show')->name('attachment.show');
                 Route::get('/download/{emailBox}/{attachmentId}', 'download')->name('attachment.download');
             });
+
+        Route::view('/outbox-view', 'outbox.template');
+
     });

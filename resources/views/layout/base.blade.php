@@ -31,6 +31,8 @@
 			@include('layout.footer')
 		</div>
 
+		@include("layout.logout")
+
 		@stack('before-scripts')
 		<!-- Javascript -->
 		<script src="{{ asset('assets/plugins/popper.min.js')}}"></script>
