@@ -279,6 +279,13 @@ Contributions are welcome. If you'd like to improve the project, feel free to fo
 
 If you discover any security issues, please report them responsibly so they can be addressed promptly.
 
-## License
+## 📄 License
 
-This project is open-sourced software licensed under the MIT license.
+This project is distributed under the **MIT License**, which permits free use, modification, and distribution of the code.
+
+### 🎨 Template Credit
+
+The UI template used in this project is designed by **Xiaoying Riley**.  
+You should provide proper credit by including attribution in your project.
+
+🔗 [Template Repository](https://github.com/xriley/portal-theme-bs5)
