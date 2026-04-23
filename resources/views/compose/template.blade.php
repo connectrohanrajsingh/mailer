@@ -78,6 +78,13 @@
                 color: #111;
             }
 
+            .intended {
+                text-align: center;
+                font-weight: bold;
+                font-size: 11px;
+                color: #646464;
+            }
+
             .footer {
                 background: linear-gradient(135deg, #15a362, #0d8a52);
                 text-align: center;
@@ -112,11 +119,6 @@
                 {{-- BODY --}}
                 <div class="body">
 
-                    {{-- Greeting --}}
-                    <div class="message-greet">
-                        Dear {{$email->to_name ?? 'User'}},
-                    </div>
-
                     {{-- Main Content --}}
                     <div class="message-body">
                         {!! $email->body !!}
@@ -130,6 +132,13 @@
                             <span style="color:#777;">Mailer Team</span>
                         </p>
                     </div>
+
+                    @if(!empty($email?->to_name))
+                        <div class="intended">
+                            This email is intended to recieved by {{$email->to_name}}
+                        </div>
+                    @endif
+
                 </div>
 
                 {{-- FOOTER --}}

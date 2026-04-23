@@ -13,7 +13,7 @@ class SentEmail extends Model
         'to_emails'  => 'json',
         'cc_emails'  => 'json',
         'bcc_emails' => 'json',
-        'reply_to'   => 'json',
+        'reply_to'   => 'integer',
         'sent_at'    => 'datetime',
     ];
 

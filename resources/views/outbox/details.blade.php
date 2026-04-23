@@ -118,9 +118,7 @@
 
                     {{-- BACK --}}
                     <div class="mt-4">
-                        <a href="{{ route('outbox.index') }}" class="btn btn-secondary">
-                            Back
-                        </a>
+                        <a href="{{ route('outbox.index') }}" class="btn btn-secondary">Back</a>
                     </div>
 
                 </div>

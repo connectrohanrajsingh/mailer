@@ -38,7 +38,7 @@ class SendEmail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'outbox.template',
+            view: 'compose.template',
             with: ['email' => $this->email]
         );
     }

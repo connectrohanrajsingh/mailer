@@ -21,7 +21,7 @@ return new class extends Migration {
             $table->string('to_name', 120)->nullable();
             $table->json('cc_emails')->nullable();
             $table->json('bcc_emails')->nullable();
-            $table->json('reply_to')->nullable();
+            $table->integer('reply_to')->nullable();
 
             $table->string('status', 20)->nullable()->default('QUEUED')->index();
             $table->string('remark', 1200)->nullable();

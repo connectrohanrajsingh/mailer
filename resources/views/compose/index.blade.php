@@ -13,33 +13,33 @@
 
                     <h4 class="mb-3">Compose Email</h4>
 
-                    <form id="emailForm" action="{{ route('outbox.store') }}" method="POST" enctype="multipart/form-data">
+                    <form id="emailForm" action="{{ route('compose.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
-                        <div class="mb-3">
+                        <div class="mt-3">
                             <label class="form-label">To</label>
-                            <input type="text" name="to_emails" id="to" class="form-control" placeholder="comma separated emails" value="{{ old('to_emails') }}" required>
+                            <input type="text" name="to_emails" id="to" class="form-control" placeholder="comma separated emails" value="{{  old('to_emails', $email->sender_email ?? null) }}" required>
                         </div>
 
                         <div class="row g-2">
-                            <div class="mb-3">
+                            <div class="mt-3">
                                 <label class="form-label">CC</label>
-                                <input type="text" name="cc_emails" id="cc" class="form-control"  value="{{ old('cc_emails') }}">
+                                <input type="text" name="cc_emails" id="cc" class="form-control" value="{{ old('cc_emails') }}">
                             </div>
 
-                            <div class="mb-3">
+                            <div class="mt-3">
                                 <label class="form-label">BCC</label>
-                                <input type="text" name="bcc_emails" id="bcc" class="form-control"  value="{{ old('bcc_emails') }}">
+                                <input type="text" name="bcc_emails" id="bcc" class="form-control" value="{{ old('bcc_emails') }}">
                             </div>
-                        </div>
-
-                        <div class="mt-3">
-                            <label class="form-label">Name</label>
-                            <input type="text" name="to_name" id="to_name" class="form-control"  value="{{ old('to_name') }}">
                         </div>
 
                         <div class="mt-3">
                             <label class="form-label">Subject</label>
-                            <input type="text" name="subject" id="subject" class="form-control"  value="{{ old('subject') }}">
+                            <input type="text" name="subject" id="subject" class="form-control" value="{{ old('subject', $email?->subject ? "Re: {$email->subject}" : null) }}">
+                        </div>
+
+                        <div class="mt-3">
+                            <label class="form-label">Name</label>
+                            <input type="text" name="to_name" id="to_name" class="form-control" value="{{ old('to_name', $email->sender_name ?? null) }}">
                         </div>
 
                         <div class="mt-3">
@@ -50,6 +50,10 @@
                         <div class="mt-3">
                             <label class="form-label">Attachments</label>
                             <input type="file" name="attachments[]" id="attachments" class="form-control" multiple>
+                        </div>
+
+                        <div class="mt-3">
+                            <input type="hidden" name="reply_to" id="reply_to" class="form-control" value="{{ old('reply_to', $email->reply_to ?? null) }}">
                         </div>
 
                         <div class="mt-4 text-end">

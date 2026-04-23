@@ -7,9 +7,8 @@
             <div class="row g-3 mb-4 align-items-center justify-content-between">
                 <div class="col-auto">
                     <div class="d-flex justify-content-between">
-
                         <h1 class="app-page-title mb-0">Outbox</h1>
-                        <a href="{{ route("outbox.compose") }}" class="mx-4 btn app-btn-secondary"><i class="fa fa-paper-plane"></i></a>
+                        <a href="{{ route("compose.index") }}" class="mx-4 btn app-btn-secondary"><i class="fa fa-paper-plane"></i></a>
                     </div>
                 </div>
                 <div class="col-auto">

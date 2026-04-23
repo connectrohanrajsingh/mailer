@@ -5,6 +5,13 @@
     <div class="app-content pt-3 p-md-3 p-lg-4">
         <div class="container-fluid">
 
+            <div class="col-auto mb-2">
+                <div class="d-flex justify-content-end">
+                    <h1 class="app-page-title mb-0  ">{{ $email->sender_email }}</h1>
+                    <a href="{{ route("compose.index",[$email->id]) }}" class="mx-4 btn app-btn-secondary"><i class="fa fa-paper-plane"></i></a>
+                </div>
+            </div>
+
             <div class="app-card shadow-sm mb-4">
                 <div class="app-card-body p-4">
 
@@ -92,9 +99,7 @@
 
                     {{-- BACK --}}
                     <div class="mt-4">
-                        <a href="{{ route('inbox.index') }}" class="btn btn-secondary">
-                            Back to Inbox
-                        </a>
+                        <a href="{{ route('inbox.index') }}" class="btn btn-secondary">Back</a>
                     </div>
 
                 </div>

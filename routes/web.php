@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AttachmentController;
+use App\Http\Controllers\ComposeEmailController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InboxController;
 use App\Http\Controllers\OutboxController;
@@ -28,9 +29,14 @@ Route::middleware(["auth"])
             ->group(function () {
                 Route::get('/', 'index')->name('outbox.index');
                 Route::post('/filter', 'filter')->name('outbox.filter');
-                Route::get('/compose/{emailId?}', 'compose')->name('outbox.compose');
-                Route::post('/store', 'store')->name('outbox.store');
                 Route::get('/show/{emailId}', 'show')->name('outbox.show');
+            });
+
+        Route::controller(ComposeEmailController::class)
+            ->prefix('compose')
+            ->group(function () {
+                Route::get('/{emailId?}', 'index')->name('compose.index');
+                Route::post('/store', 'store')->name('compose.store');
             });
 
         Route::controller(AttachmentController::class)
@@ -39,7 +45,4 @@ Route::middleware(["auth"])
                 Route::get('/show/{emailBox}/{attachmentId}', 'show')->name('attachment.show');
                 Route::get('/download/{emailBox}/{attachmentId}', 'download')->name('attachment.download');
             });
-
-        Route::view('/outbox-view', 'outbox.template');
-
     });
