@@ -21,6 +21,9 @@ class DashboardController extends Controller
 
         $inboxAttachments = FetchedEmailAttachment::count();
 
+        $unreadCount = FetchedEmailOverview::where('processed', 1)->where('seen', 0)->count();
+        $sentCount   = \App\Models\SentEmail::count();
+
 
         // Details overview
         $detailStats = FetchedEmailOverview::from('fetched_email_overviews as fe')
@@ -56,6 +59,8 @@ class DashboardController extends Controller
             'inboxAttachments' => $inboxAttachments,
             'detailStats'      => $detailStats,
             'latesEmailstats'  => $latesEmailstats,
+            'unreadCount'      => $unreadCount,
+            'sentCount'        => $sentCount,
         ];
 
         return view("dashboard.index", $context);

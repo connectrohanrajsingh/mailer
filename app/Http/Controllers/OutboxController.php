@@ -23,9 +23,7 @@ class OutboxController extends Controller
             abort(500, 'Filter criteria not found');
         }
 
-        $queryBuilder = SentEmail::select(['id', 'to_emails', 'to_name', 'subject', 'created_at', 'sent_at'])
-            ->withCount('attachments')
-            ->orderBy("created_at", "desc");
+        $queryBuilder = SentEmail::select(['id', 'to_emails', 'to_name', 'subject', 'created_at', 'sent_at', 'status'])->withCount('attachments')->orderBy("created_at", "desc");
 
         app(ApplyFilters::class)->applyFilters($request, $queryBuilder, $filterOptions, $filterCondition);
         $emails = $queryBuilder->paginate(10)->withQueryString();
@@ -61,7 +59,7 @@ class OutboxController extends Controller
         return redirect()->route('outbox.index', $validated);
     }
 
-  
+
     public function show($emailId)
     {
         $email   = SentEmail::with(['attachments'])->findOrFail($emailId);

@@ -14,13 +14,14 @@
 		@stack('before-styles')
 
 		<link id="theme-style" rel="stylesheet" href="{{ asset('assets/css/portal.css') }}">
+		<link rel="stylesheet" href="{{ asset('assets/css/mailer.css') }}">
 		<link rel="stylesheet" href="{{ asset('assets/plugins/sweetalert2/sweetalert2.min.css') }}">
 
 		@stack('after-styles')
 	</head>
 
 
-	<body class="app">
+	<body class="app mail-app">
 		<header class="app-header fixed-top">
 			@include('layout.navbar')
 			@include('layout.sidebar')

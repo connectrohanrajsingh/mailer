@@ -2,128 +2,114 @@
 @section('title', 'Sent Email Details')
 
 @section('content')
-    <div class="app-content pt-3 p-md-3 p-lg-4">
-        <div class="container-fluid">
+    <div class="app-content">
+        <div class="ml-page">
 
-            <div class="app-card shadow-sm mb-4">
-                <div class="app-card-body p-4">
+            <div class="ml-page-head">
+                <a href="{{ route('outbox.index') }}" class="ml-chip-btn">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Sent
+                </a>
 
-                    {{-- SUBJECT --}}
-                    <h3 class="mb-3">{{ $email->subject }}</h3>
+                <div class="ml-reader-actions">
+                    <span class="ml-status ml-status-{{ strtolower($email->status ?? 'queued') }}">{{ strtolower($email->status ?? 'queued') }}</span>
+                    <a href="{{ route('compose.index') }}" class="ml-action-btn ml-action-btn-primary">
+                        <i class="fa-solid fa-pen-to-square"></i> New Message
+                    </a>
+                </div>
+            </div>
 
-                    {{-- FROM --}}
-                    <div class="mb-2">
-                        <strong>From:</strong>
-                        {{ $email->from_name }} ({{ $email->from_email }})
-                    </div>
+            <div class="ml-reader">
 
-                    {{-- TO --}}
-                    <div class="mb-2">
-                        <strong>To:</strong><br>
-                        @foreach ($email->to_emails ?? [] as $mail)
-                            <span class="badge bg-danger text-white">{{ $mail }}</span>
-                        @endforeach
-                    </div>
+                <div class="ml-reader-head">
+                    <h2 class="ml-reader-subject">{{ $email->subject ?? '(no subject)' }}</h2>
 
-                    {{-- CC --}}
-                    @if(!empty($email->cc_emails))
-                        <div class="mb-2">
-                            <strong>CC:</strong><br>
-                            @foreach ($email->cc_emails as $mail)
-                                <span class="badge bg-info text-dark">{{ $mail }}</span>
-                            @endforeach
+                    <div class="ml-reader-meta">
+                        <div class="ml-from-line">
+                            @include('partials.avatar', ['name' => $email->from_name, 'email' => $email->from_email, 'size' => 'lg'])
+                            <div>
+                                <div class="ml-from-name">
+                                    {{ $email->from_name ?: 'Me' }}
+                                    &lt;<span class="ml-from-email">{{ $email->from_email }}</span>&gt;
+                                </div>
+                                <div class="ml-to-line">
+                                    to
+                                    @forelse ($email->to_emails ?? [] as $mail)
+                                        <span class="ml-pill">{{ $mail }}</span>
+                                    @empty
+                                        &mdash;
+                                    @endforelse
+                                    @if (!empty($email->cc_emails))
+                                        &middot; cc
+                                        @foreach ($email->cc_emails as $mail)
+                                            <span class="ml-pill">{{ $mail }}</span>
+                                        @endforeach
+                                    @endif
+                                    @if (!empty($email->bcc_emails))
+                                        &middot; bcc
+                                        @foreach ($email->bcc_emails as $mail)
+                                            <span class="ml-pill">{{ $mail }}</span>
+                                        @endforeach
+                                    @endif
+                                </div>
+                            </div>
                         </div>
-                    @endif
 
-                    {{-- BCC --}}
-                    @if(!empty($email->bcc_emails))
-                        <div class="mb-2">
-                            <strong>BCC:</strong><br>
-                            @foreach ($email->bcc_emails as $mail)
-                                <span class="badge bg-warning text-dark">{{ $mail }}</span>
-                            @endforeach
-                        </div>
-                    @endif
-
-                    {{-- REPLY TO --}}
-                    @if(!empty($email->reply_to))
-                        <div class="mb-2">
-                            <strong>Reply To:</strong><br>
-                            @foreach ($email->reply_to as $mail)
-                                <span class="badge bg-secondary">{{ $mail }}</span>
-                            @endforeach
-                        </div>
-                    @endif
-
-                    {{-- STATUS --}}
-                    <div class="mb-2">
-                        <strong>Status:</strong>
-                        <span class="badge bg-success">{{ ucfirst($email->status) }}</span>
-                    </div>
-
-                    {{-- SENT DATE --}}
-                    <div class="mb-2">
-                        <strong>Sent At:</strong>
-                        {{ $email->sent_at?->format('d M Y h:i A') }}
-                    </div>
-
-                    {{-- REMARK --}}
-                    @if($email->remark)
-                        <div class="mb-2">
-                            <strong>Remark:</strong> {{ $email->remark }}
-                        </div>
-                    @endif
-
-                    <hr>
-
-                    {{-- BODY --}}
-                    <div class="mt-3">
-                        <strong>Message:</strong>
-
-                        <div class="mt-2 border p-3 rounded bg-light">
-                            @if($email->body)
-                                {!! $email->body !!}
-                            @else
-                                <em>No content available</em>
+                        <div class="text-md-end">
+                            <div class="ml-row-date" style="font-size:.85rem">
+                                {{ ($email->sent_at ?: $email->created_at)?->format('d M Y, H:i') }}
+                            </div>
+                            @if ($email->reply_to)
+                                <div class="mt-1">
+                                    <span class="ml-flag ml-flag-answered"><i class="fa-solid fa-reply"></i> Reply</span>
+                                </div>
                             @endif
                         </div>
                     </div>
 
-                    {{-- ATTACHMENTS --}}
-                    @if($email->attachments->count())
-                        <div class="mt-4">
-                            <strong>Attachments:</strong>
-
-                            <ul class="list-group mt-2">
-                                @foreach($email->attachments as $file)
-                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-
-                                        <div>
-                                            📎 {{ $file->name }}
-                                            <br>
-                                            <small class="text-muted">
-                                                {{ $file->mime_type }} | {{ number_format($file->size / 1024, 2) }} KB
-                                            </small>
-                                        </div>
-
-                                        <div>
-                                            <a href="{{ $file->getDownloadUrl() }}" class="btn btn-sm btn-success text-white">Download</a>
-                                        </div>
-
-                                    </li>
-                                @endforeach
-                            </ul>
+                    @if ($email->remark && strtolower($email->status) === 'failed')
+                        <div class="alert alert-danger mt-3 mb-0 py-2 px-3 small rounded-3">
+                            <i class="fa-solid fa-triangle-exclamation me-1"></i> {{ $email->remark }}
                         </div>
                     @endif
-
-                    {{-- BACK --}}
-                    <div class="mt-4">
-                        <a href="{{ route('outbox.index') }}" class="btn btn-secondary">Back</a>
-                    </div>
-
                 </div>
+
+                <div class="ml-reader-body">
+                    @if ($email->body)
+                        <div class="ml-body-content">{!! $email->body !!}</div>
+                    @else
+                        <div class="ml-empty">
+                            <i class="fa-regular fa-file-lines"></i>
+                            No message content
+                        </div>
+                    @endif
+                </div>
+
+                @if ($email->attachments->count())
+                    <div class="ml-attachments">
+                        <div class="ml-attachments-title">
+                            <i class="fa-solid fa-paperclip me-1"></i> {{ $email->attachments->count() }} Attachment{{ $email->attachments->count() > 1 ? 's' : '' }}
+                        </div>
+                        <div class="ml-attachment-grid">
+                            @foreach ($email->attachments as $file)
+                                <a class="ml-attachment" href="{{ $file->getDownloadUrl() }}">
+                                    <span class="ml-file-icon"><i class="fa-solid fa-file"></i></span>
+                                    <span>
+                                        <span class="ml-file-name d-block">{{ $file->name }}</span>
+                                        <span class="ml-file-meta">{{ number_format($file->size / 1024, 1) }} KB</span>
+                                    </span>
+                                    <i class="fa-solid fa-download ms-auto" style="color:var(--ml-muted)"></i>
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
             </div>
 
         </div>
     </div>
 @endsection
+
+@push('after-scripts')
+    @include('partials/sweetalert')
+@endpush

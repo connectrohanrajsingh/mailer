@@ -22,7 +22,7 @@ class InboxController extends Controller
             abort(500, 'Filter criteria not found');
         }
 
-        $queryBuilder = FetchedEmailOverview::where('processed', TRUE)->orderBy("created_at", "desc");
+        $queryBuilder = FetchedEmailOverview::where('processed', TRUE)->with('body:id,email_id,body_text,body_html')->orderBy("created_at", "desc");
         app(ApplyFilters::class)->applyFilters($request, $queryBuilder, $filterOptions, $filterCondition);
         $emails = $queryBuilder->paginate(10)->withQueryString();
 

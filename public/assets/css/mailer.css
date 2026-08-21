@@ -1,0 +1,1224 @@
+/* ==========================================================================
+   Mailer — email client UI layer
+   Loaded after portal.css; overrides the admin-template look with a
+   mail-client experience (folders, message list, reading pane, compose).
+   ========================================================================== */
+
+:root {
+    --ml-bg: #f6f8fc;
+    --ml-surface: #ffffff;
+    --ml-border: #e4e8ef;
+    --ml-text: #1f2430;
+    --ml-muted: #69718a;
+    --ml-accent: #2563eb;
+    --ml-accent-soft: #eaf1fe;
+    --ml-unread: #2563eb;
+    --ml-star: #f5b301;
+    --ml-danger: #dc3545;
+    --ml-success: #16a34a;
+    --ml-warn: #d97706;
+    --ml-radius: 14px;
+    --ml-shadow: 0 1px 2px rgba(16, 24, 40, .06), 0 1px 3px rgba(16, 24, 40, .08);
+    --ml-shadow-lg: 0 12px 28px rgba(16, 24, 40, .14);
+}
+
+body.mail-app {
+    background: var(--ml-bg);
+    color: var(--ml-text);
+    font-size: .925rem;
+    padding-top: 76px;
+}
+
+/* --------------------------------------------------------------------------
+   Header / navbar
+   -------------------------------------------------------------------------- */
+
+body.mail-app .app-header {
+    background: var(--ml-surface);
+    border-bottom: 1px solid var(--ml-border);
+    box-shadow: none;
+    height: auto;
+}
+
+body.mail-app .app-header-inner {
+    background: transparent;
+}
+
+.ml-header-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-height: 56px;
+    padding-top: .5rem;
+    padding-bottom: .6rem;
+}
+
+.ml-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: .55rem;
+    text-decoration: none;
+    color: var(--ml-text);
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: -.01em;
+}
+
+.ml-brand img {
+    width: 30px;
+    height: 30px;
+}
+
+.ml-brand:hover {
+    color: var(--ml-text);
+}
+
+/* Header actions */
+.ml-header-actions {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+}
+
+.ml-icon-btn {
+    width: 38px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: var(--ml-muted);
+    background: transparent;
+    border: 0;
+    text-decoration: none;
+}
+
+.ml-icon-btn:hover {
+    background: #eef1f7;
+    color: var(--ml-text);
+}
+
+body.mail-app .app-user-dropdown img {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 2px solid var(--ml-border);
+}
+
+/* --------------------------------------------------------------------------
+   Sidebar — folder tree
+   -------------------------------------------------------------------------- */
+
+body.mail-app .app-sidepanel {
+    background: var(--ml-surface);
+    border-right: 1px solid var(--ml-border);
+}
+
+body.mail-app .app-sidepanel .sidepanel-inner {
+    box-shadow: none;
+    width: 250px;
+    background: var(--ml-surface);
+}
+
+body.mail-app .app-branding {
+    height: auto;
+    padding: 1.1rem 1.25rem .4rem;
+    margin-bottom: .75rem;
+}
+
+body.mail-app .app-branding .logo-text {
+    font-weight: 800;
+    letter-spacing: -.01em;
+}
+
+.ml-compose-slot {
+    padding: .35rem 1rem 1rem;
+    margin-top: .75rem;
+}
+
+.ml-btn-compose-block {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .55rem;
+    width: 100%;
+    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+    color: #fff;
+    border-radius: 12px;
+    padding: .7rem 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgba(79, 70, 229, .28);
+    transition: background .12s ease, transform .12s ease, box-shadow .12s ease;
+}
+
+.ml-btn-compose-block:hover {
+    background: linear-gradient(135deg, #1d4fd7 0%, #6d28d9 100%);
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(79, 70, 229, .38);
+}
+
+body.mail-app .app-nav-main {
+    padding: 0 .6rem;
+}
+
+body.mail-app .app-nav .nav-item {
+    background: transparent;
+    margin-bottom: .15rem;
+}
+
+body.mail-app .app-nav .nav-link {
+    display: flex;
+    align-items: center;
+    gap: .85rem;
+    padding: .62rem .85rem;
+    border-left: 0;
+    border-radius: 10px;
+    color: var(--ml-text);
+    font-weight: 500;
+    transition: background .12s ease;
+}
+
+body.mail-app .app-nav .nav-link .nav-icon {
+    display: inline-flex;
+    position: static;
+    top: auto;
+    left: auto;
+    width: 20px;
+    justify-content: center;
+    color: var(--ml-muted);
+}
+
+body.mail-app .app-nav .nav-link:hover {
+    background: linear-gradient(90deg, #eef3fe 0%, #f7f5ff 100%);
+    color: var(--ml-accent);
+}
+
+body.mail-app .app-nav .nav-link.active {
+    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+    color: #fff;
+    border-left: 0;
+    font-weight: 600;
+    box-shadow: 0 4px 14px rgba(79, 70, 229, .28);
+}
+
+body.mail-app .app-nav .nav-link.active:hover {
+    color: #fff;
+    background: linear-gradient(135deg, #1d4fd7 0%, #6d28d9 100%);
+}
+
+body.mail-app .app-nav .nav-link.active .nav-icon {
+    color: rgba(255, 255, 255, .92);
+}
+
+.ml-nav-label {
+    flex: 1 1 auto;
+}
+
+.ml-count {
+    min-width: 22px;
+    text-align: center;
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--ml-muted);
+    background: #eef1f7;
+    border-radius: 999px;
+    padding: .1rem .5rem;
+}
+
+.ml-count-unread {
+    color: #fff;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    box-shadow: 0 2px 6px rgba(79, 70, 229, .35);
+}
+
+body.mail-app .app-nav .nav-link.active .ml-count {
+    color: #fff;
+    background: rgba(255, 255, 255, .22);
+    box-shadow: none;
+}
+
+body.mail-app .app-sidepanel-footer {
+    border-top: 1px solid var(--ml-border);
+    padding: .4rem .6rem;
+}
+
+body.mail-app .app-nav-footer .nav-link {
+    font-size: .8rem;
+    color: var(--ml-muted);
+    padding: .45rem .85rem;
+    border-radius: 8px;
+}
+
+body.mail-app .app-nav-footer .nav-link:hover {
+    background: #eef1f7;
+    color: var(--ml-text);
+}
+
+/* --------------------------------------------------------------------------
+   Page shell
+   -------------------------------------------------------------------------- */
+
+.ml-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.25rem 1rem 3rem;
+}
+
+.ml-page-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.ml-page-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: -.01em;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: .6rem;
+}
+
+.ml-page-sub {
+    color: var(--ml-muted);
+    font-size: .85rem;
+    margin-top: .15rem;
+}
+
+.ml-toolbar {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    flex-wrap: wrap;
+}
+
+.ml-chip-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    background: var(--ml-surface);
+    border: 1px solid var(--ml-border);
+    color: var(--ml-muted);
+    border-radius: 999px;
+    padding: .42rem .9rem;
+    font-size: .84rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all .12s ease;
+}
+
+.ml-chip-btn:hover,
+.ml-chip-btn.active {
+    color: var(--ml-accent);
+    border-color: var(--ml-accent);
+    background: var(--ml-accent-soft);
+}
+
+/* Advanced filter panel */
+.ml-filter-panel {
+    background: var(--ml-surface);
+    border: 1px solid var(--ml-border);
+    border-radius: var(--ml-radius);
+    box-shadow: var(--ml-shadow);
+    padding: .9rem 1rem;
+    margin-bottom: 1rem;
+}
+
+.ml-filter-panel .form-control,
+.ml-filter-panel .form-select {
+    border-radius: 10px;
+    border-color: var(--ml-border);
+    font-size: .88rem;
+}
+
+/* --------------------------------------------------------------------------
+   Message list (inbox / outbox)
+   -------------------------------------------------------------------------- */
+
+.ml-list-card {
+    background: var(--ml-surface);
+    border: 1px solid var(--ml-border);
+    border-radius: var(--ml-radius);
+    box-shadow: var(--ml-shadow);
+    overflow: hidden;
+}
+
+.ml-row {
+    display: flex;
+    align-items: center;
+    gap: .9rem;
+    padding: .8rem 1.1rem;
+    border-bottom: 1px solid var(--ml-border);
+    text-decoration: none;
+    color: var(--ml-text);
+    position: relative;
+    transition: background .1s ease;
+}
+
+.ml-row:last-child {
+    border-bottom: 0;
+}
+
+.ml-row:hover {
+    background: #f4f7fd;
+    box-shadow: inset 3px 0 0 var(--ml-accent);
+}
+
+.ml-row.is-unread {
+    background: #fbfcff;
+}
+
+.ml-row.is-unread:hover {
+    background: #f0f4fd;
+}
+
+.ml-row-main {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.ml-row-top {
+    display: flex;
+    align-items: baseline;
+    gap: .6rem;
+    min-width: 0;
+}
+
+.ml-row-sender {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 260px;
+}
+
+.ml-row.is-unread .ml-row-sender {
+    font-weight: 800;
+}
+
+.ml-row-email {
+    color: var(--ml-muted);
+    font-size: .8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ml-row-subject-snippet {
+    color: var(--ml-muted);
+    font-size: .86rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: .12rem;
+}
+
+.ml-row.is-unread .ml-row-subject-snippet {
+    color: var(--ml-text);
+}
+
+.ml-row-subject-snippet strong {
+    color: inherit;
+    font-weight: 600;
+}
+
+.ml-row-side {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    flex-shrink: 0;
+}
+
+.ml-row-date {
+    color: var(--ml-muted);
+    font-size: .78rem;
+    white-space: nowrap;
+    min-width: 64px;
+    text-align: right;
+}
+
+.ml-row.is-unread .ml-row-date {
+    color: var(--ml-accent);
+    font-weight: 700;
+}
+
+.ml-clip {
+    color: var(--ml-muted);
+    font-size: .82rem;
+}
+
+.ml-unread-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--ml-unread);
+    flex-shrink: 0;
+}
+
+.ml-status {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    border-radius: 999px;
+    padding: .18rem .55rem;
+    text-transform: uppercase;
+}
+
+.ml-status-sent {
+    color: #14532d;
+    background: #dcfce7;
+}
+
+.ml-status-queued,
+.ml-status-processing {
+    color: #1e3a8a;
+    background: #dbeafe;
+}
+
+.ml-status-failed {
+    color: #7f1d1d;
+    background: #fee2e2;
+}
+
+.ml-status-done {
+    color: #14532d;
+    background: #dcfce7;
+}
+
+.ml-status-not_found,
+.ml-status-imap_error,
+.ml-status-save_error {
+    color: #7c2d12;
+    background: #ffedd5;
+}
+
+/* Avatars */
+.ml-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 700;
+    font-size: .95rem;
+    flex-shrink: 0;
+    user-select: none;
+}
+
+.ml-avatar-lg {
+    width: 48px;
+    height: 48px;
+    font-size: 1.15rem;
+}
+
+.ml-av-0 { background: #2563eb; }
+.ml-av-1 { background: #7c3aed; }
+.ml-av-2 { background: #db2777; }
+.ml-av-3 { background: #ea580c; }
+.ml-av-4 { background: #059669; }
+.ml-av-5 { background: #0891b2; }
+
+/* Empty state */
+.ml-empty {
+    text-align: center;
+    padding: 3.5rem 1rem;
+    color: var(--ml-muted);
+}
+
+.ml-empty i {
+    font-size: 2.4rem;
+    opacity: .35;
+    display: block;
+    margin-bottom: .8rem;
+}
+
+/* Pagination */
+body.mail-app .app-pagination .page-link {
+    border: 0;
+    border-radius: 8px !important;
+    margin: 0 .15rem;
+    color: var(--ml-muted);
+    font-weight: 600;
+    font-size: .85rem;
+}
+
+body.mail-app .app-pagination .page-item.active .page-link {
+    background: var(--ml-accent);
+    color: #fff;
+}
+
+body.mail-app .app-pagination .page-link:focus {
+    box-shadow: none;
+}
+
+.ml-list-meta {
+    color: var(--ml-muted);
+    font-size: .82rem;
+}
+
+/* --------------------------------------------------------------------------
+   Reading pane (inbox/outbox details)
+   -------------------------------------------------------------------------- */
+
+.ml-reader {
+    background: var(--ml-surface);
+    border: 1px solid var(--ml-border);
+    border-radius: var(--ml-radius);
+    box-shadow: var(--ml-shadow);
+    overflow: hidden;
+}
+
+.ml-reader-head {
+    padding: 1.25rem 1.5rem 1rem;
+    border-bottom: 1px solid var(--ml-border);
+}
+
+.ml-reader-subject {
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: -.01em;
+    margin: 0 0 .9rem;
+    word-break: break-word;
+}
+
+.ml-reader-meta {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.ml-from-line {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+    min-width: 0;
+}
+
+.ml-from-name {
+    font-weight: 700;
+}
+
+.ml-from-email {
+    color: var(--ml-muted);
+    font-size: .85rem;
+}
+
+.ml-to-line {
+    color: var(--ml-muted);
+    font-size: .82rem;
+    margin-top: .15rem;
+}
+
+.ml-to-line .ml-pill {
+    display: inline-block;
+    background: #eef1f7;
+    border-radius: 999px;
+    padding: .05rem .55rem;
+    margin: .1rem .15rem .1rem 0;
+    color: var(--ml-text);
+    font-size: .78rem;
+}
+
+.ml-reader-actions {
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+}
+
+.ml-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    border: 1px solid var(--ml-border);
+    background: var(--ml-surface);
+    color: var(--ml-text);
+    border-radius: 999px;
+    padding: .45rem 1rem;
+    font-size: .85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all .12s ease;
+}
+
+.ml-action-btn:hover {
+    border-color: var(--ml-accent);
+    color: var(--ml-accent);
+    background: var(--ml-accent-soft);
+}
+
+.ml-action-btn-primary {
+    background: var(--ml-accent);
+    border-color: var(--ml-accent);
+    color: #fff;
+}
+
+.ml-action-btn-primary:hover {
+    background: #1d4fd7;
+    color: #fff;
+}
+
+.ml-reader-body {
+    padding: 1.5rem;
+}
+
+.ml-body-frame {
+    border: 0;
+    border-radius: 10px;
+    background: #fff;
+    width: 100%;
+    min-height: 320px;
+}
+
+.ml-body-content {
+    line-height: 1.65;
+    word-break: break-word;
+}
+
+.ml-body-content img {
+    max-width: 100%;
+    height: auto;
+}
+
+.ml-body-plain {
+    white-space: pre-wrap;
+    font-family: inherit;
+    background: #fafbfe;
+    border: 1px dashed var(--ml-border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    margin: 0;
+}
+
+/* Attachments */
+.ml-attachments {
+    padding: 1rem 1.5rem 1.4rem;
+    border-top: 1px solid var(--ml-border);
+    background: #fafbfe;
+}
+
+.ml-attachments-title {
+    font-size: .8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--ml-muted);
+    margin-bottom: .75rem;
+}
+
+.ml-attachment-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: .7rem;
+}
+
+.ml-attachment {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    background: var(--ml-surface);
+    border: 1px solid var(--ml-border);
+    border-radius: 12px;
+    padding: .65rem .8rem;
+    text-decoration: none;
+    color: var(--ml-text);
+    transition: all .12s ease;
+}
+
+.ml-attachment:hover {
+    border-color: var(--ml-accent);
+    box-shadow: var(--ml-shadow);
+    transform: translateY(-1px);
+}
+
+.ml-file-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ml-accent-soft);
+    color: var(--ml-accent);
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.ml-file-name {
+    font-weight: 600;
+    font-size: .84rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 170px;
+}
+
+.ml-file-meta {
+    color: var(--ml-muted);
+    font-size: .74rem;
+}
+
+/* Flags row */
+.ml-flag {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    font-size: .72rem;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: .18rem .6rem;
+    margin-right: .3rem;
+}
+
+.ml-flag-seen     { color: #14532d; background: #dcfce7; }
+.ml-flag-answered { color: #1e3a8a; background: #dbeafe; }
+.ml-flag-flagged  { color: #713f12; background: #fef3c7; }
+
+/* --------------------------------------------------------------------------
+   Compose
+   -------------------------------------------------------------------------- */
+
+.ml-compose-card {
+    max-width: 860px;
+    margin: 0 auto;
+    background: var(--ml-surface);
+    border: 1px solid var(--ml-border);
+    border-radius: var(--ml-radius);
+    box-shadow: var(--ml-shadow-lg);
+    overflow: hidden;
+}
+
+.ml-compose-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: .9rem 1.4rem;
+    background: #f8fafd;
+    border-bottom: 1px solid var(--ml-border);
+}
+
+.ml-compose-title {
+    font-weight: 700;
+    font-size: 1rem;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: .55rem;
+}
+
+.ml-compose-body {
+    padding: .4rem 1.4rem 1.4rem;
+}
+
+.ml-field {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    border-bottom: 1px solid var(--ml-border);
+    padding: .55rem 0;
+}
+
+.ml-field label {
+    width: 52px;
+    flex-shrink: 0;
+    color: var(--ml-muted);
+    font-size: .85rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.ml-field input[type="text"] {
+    border: 0;
+    outline: 0;
+    box-shadow: none !important;
+    flex: 1 1 auto;
+    padding: .35rem 0;
+    font-size: .93rem;
+    background: transparent;
+}
+
+.ml-field-toggle {
+    border: 0;
+    background: transparent;
+    color: var(--ml-muted);
+    font-size: .78rem;
+    font-weight: 700;
+    padding: .2rem .5rem;
+    border-radius: 6px;
+}
+
+.ml-field-toggle:hover {
+    background: #eef1f7;
+    color: var(--ml-text);
+}
+
+.ml-editor-shell {
+    border-bottom: 1px solid var(--ml-border);
+    padding: .6rem 0 .9rem;
+}
+
+.ml-editor-shell .note-editor {
+    border: 1px solid var(--ml-border) !important;
+    border-radius: 10px !important;
+}
+
+.ml-attach-zone {
+    padding: .9rem 0;
+}
+
+.ml-attach-input {
+    border: 1.5px dashed var(--ml-border);
+    border-radius: 12px;
+    padding: .9rem 1rem;
+    background: #fafbfe;
+    font-size: .85rem;
+    color: var(--ml-muted);
+    width: 100%;
+}
+
+.ml-attach-input::file-selector-button {
+    border: 0;
+    background: var(--ml-accent-soft);
+    color: var(--ml-accent);
+    font-weight: 700;
+    border-radius: 999px;
+    padding: .45rem 1rem;
+    margin-right: .9rem;
+    cursor: pointer;
+}
+
+.ml-compose-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.ml-send-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .55rem;
+    background: var(--ml-accent);
+    color: #fff;
+    border: 0;
+    border-radius: 999px;
+    padding: .6rem 1.6rem;
+    font-weight: 700;
+    box-shadow: var(--ml-shadow);
+    transition: all .12s ease;
+}
+
+.ml-send-btn:hover {
+    background: #1d4fd7;
+    transform: translateY(-1px);
+    box-shadow: var(--ml-shadow-lg);
+    color: #fff;
+}
+
+.ml-compose-hint {
+    color: var(--ml-muted);
+    font-size: .78rem;
+}
+
+/* Reply context banner in compose */
+.ml-reply-banner {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    background: var(--ml-accent-soft);
+    border: 1px solid #cdddfb;
+    border-radius: 10px;
+    padding: .6rem .9rem;
+    margin-bottom: 1rem;
+    font-size: .85rem;
+}
+
+/* --------------------------------------------------------------------------
+   Dashboard
+   -------------------------------------------------------------------------- */
+
+/* Hero banner */
+.ml-hero {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+    border-radius: var(--ml-radius);
+    padding: 1.75rem 2rem;
+    color: #fff;
+    box-shadow: 0 10px 26px rgba(79, 70, 229, .30);
+}
+
+.ml-hero-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -.01em;
+    margin-bottom: .35rem;
+}
+
+.ml-hero-sub {
+    opacity: .92;
+    margin-bottom: 1.1rem;
+}
+
+.ml-hero-sub strong {
+    color: #fff;
+}
+
+.ml-hero-actions {
+    display: flex;
+    gap: .6rem;
+    flex-wrap: wrap;
+}
+
+.ml-btn-white,
+.ml-btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    border-radius: 999px;
+    padding: .55rem 1.25rem;
+    font-weight: 700;
+    font-size: .88rem;
+    text-decoration: none !important;
+    transition: all .12s ease;
+}
+
+.ml-btn-white {
+    background: #fff;
+    color: var(--ml-accent);
+}
+
+.ml-btn-white:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, .18);
+}
+
+.ml-btn-ghost {
+    background: rgba(255, 255, 255, .14);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, .45);
+}
+
+.ml-btn-ghost:hover {
+    background: rgba(255, 255, 255, .24);
+    color: #fff;
+}
+
+.ml-hero-art {
+    position: absolute;
+    right: 2rem;
+    top: 50%;
+    transform: translateY(-50%) rotate(-8deg);
+    font-size: 7rem;
+    opacity: .16;
+    pointer-events: none;
+}
+
+@media (max-width: 767.98px) {
+    .ml-hero {
+        padding: 1.4rem 1.25rem;
+    }
+
+    .ml-hero-art {
+        display: none;
+    }
+}
+
+/* Stat cards */
+.ml-stat-card {
+    background: var(--ml-surface);
+    border: 1px solid var(--ml-border);
+    border-radius: var(--ml-radius);
+    box-shadow: var(--ml-shadow);
+    padding: 1.15rem 1.25rem;
+    height: 100%;
+    transition: transform .12s ease, box-shadow .12s ease;
+}
+
+.ml-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--ml-shadow-lg);
+}
+
+.ml-stat-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1rem;
+    margin-bottom: .8rem;
+}
+
+.ml-gi-blue   { background: linear-gradient(135deg, #2563eb, #60a5fa); }
+.ml-gi-purple { background: linear-gradient(135deg, #7c3aed, #c084fc); }
+.ml-gi-green  { background: linear-gradient(135deg, #059669, #34d399); }
+.ml-gi-orange { background: linear-gradient(135deg, #ea580c, #fbbf24); }
+
+.ml-stat-figure {
+    font-size: 1.65rem;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    line-height: 1.15;
+}
+
+.ml-stat-figure-sm {
+    font-size: 1.02rem;
+    padding-top: .35rem;
+}
+
+.ml-stat-label {
+    color: var(--ml-muted);
+    font-size: .82rem;
+    font-weight: 600;
+    margin-top: .15rem;
+}
+
+/* Panels */
+.ml-panel {
+    background: var(--ml-surface);
+    border: 1px solid var(--ml-border);
+    border-radius: var(--ml-radius);
+    box-shadow: var(--ml-shadow);
+}
+
+.ml-panel-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: 1.05rem 1.25rem .35rem;
+    flex-wrap: wrap;
+}
+
+.ml-panel-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.ml-panel-sub {
+    color: var(--ml-muted);
+    font-size: .78rem;
+}
+
+.ml-panel-body {
+    padding: .75rem 1.25rem 1.25rem;
+}
+
+/* Top senders */
+.ml-sender-row {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+    padding: .55rem 0;
+}
+
+.ml-sender-row + .ml-sender-row {
+    border-top: 1px solid var(--ml-border);
+}
+
+.ml-sender-main {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.ml-sender-name {
+    font-weight: 600;
+    font-size: .86rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ml-bar {
+    height: 7px;
+    background: #eef1f7;
+    border-radius: 999px;
+    margin-top: .4rem;
+    overflow: hidden;
+}
+
+.ml-bar span {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #2563eb, #7c3aed);
+}
+
+/* Generic pill + dashboard table */
+.ml-pill {
+    display: inline-block;
+    background: #eef1f7;
+    border-radius: 999px;
+    padding: .12rem .65rem;
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--ml-text);
+}
+
+body.mail-app .ml-table th {
+    font-size: .72rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--ml-muted);
+    border-bottom: 1px solid var(--ml-border);
+    padding: .65rem 1.25rem;
+    font-weight: 700;
+}
+
+body.mail-app .ml-table td {
+    padding: .7rem 1.25rem;
+    border-bottom: 1px solid var(--ml-border);
+    vertical-align: middle;
+}
+
+body.mail-app .ml-table tr:last-child td {
+    border-bottom: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Small screens
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 767.98px) {
+    .ml-row {
+        padding: .7rem .8rem;
+        gap: .6rem;
+    }
+
+    .ml-row-email {
+        display: none;
+    }
+
+    .ml-row-date {
+        min-width: auto;
+    }
+
+    .ml-reader-head,
+    .ml-reader-body,
+    .ml-attachments {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .ml-page {
+        padding: 1rem .6rem 2.5rem;
+    }
+}
